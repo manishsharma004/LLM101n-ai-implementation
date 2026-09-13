@@ -1,8 +1,20 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { chapters } from '../content/chapters'
+import { ProgressPanel } from '../components/ProgressPanel'
 import { StorytellerPanel } from '../components/StorytellerPanel'
+import { isChapterComplete } from '../lib/progress'
+
+const GUIDED_FIRST = [1, 2, 3, 4, 5, 6]
 
 export function HomePage() {
+  const [, tick] = useState(0)
+  useEffect(() => {
+    const onUpdate = () => tick((n) => n + 1)
+    window.addEventListener('llm101n-progress', onUpdate)
+    return () => window.removeEventListener('llm101n-progress', onUpdate)
+  }, [])
+
   return (
     <div className="page home">
       <header className="hero">
@@ -19,15 +31,38 @@ export function HomePage() {
 
       <StorytellerPanel />
 
+      <section className="guided-path">
+        <h2>Start here (self-learners)</h2>
+        <p className="muted">
+          Work chapters 01→06 before transformers and finetuning: bigram sampling, micrograd, MLP, attention, transformer
+          stack, tokenization.
+        </p>
+        <ol className="syllabus guided">
+          {chapters
+            .filter((ch) => GUIDED_FIRST.includes(ch.number))
+            .map((ch) => (
+              <li key={ch.id}>
+                <Link to={`/chapter/${ch.slug}`}>
+                  <span className="ch-num">{String(ch.number).padStart(2, '0')}</span>
+                  <span className="ch-title">{ch.title}</span>
+                </Link>
+              </li>
+            ))}
+        </ol>
+      </section>
+
+      <ProgressPanel />
+
       <section>
-        <h2>Syllabus</h2>
+        <h2>Full syllabus</h2>
         <ol className="syllabus">
           {chapters.map((ch) => (
-            <li key={ch.id}>
+            <li key={ch.id} className={isChapterComplete(ch.id) ? 'done' : undefined}>
               <Link to={`/chapter/${ch.slug}`}>
                 <span className="ch-num">{String(ch.number).padStart(2, '0')}</span>
                 <span className="ch-title">{ch.title}</span>
                 <span className="ch-topic">{ch.syllabusTopic}</span>
+                {isChapterComplete(ch.id) ? <span className="ch-done" aria-label="Completed">✓</span> : null}
               </Link>
             </li>
           ))}

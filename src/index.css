@@ -269,6 +269,30 @@ button.primary {
   margin-top: 2rem;
 }
 
+.guided-path {
+  margin: 1.5rem 0;
+}
+
+.syllabus li.done .ch-title {
+  color: var(--muted);
+}
+
+.ch-done {
+  margin-left: 0.5rem;
+  color: var(--accent, #6ee7b7);
+}
+
+.chapter-progress {
+  margin: 1rem 0;
+}
+
+.progress-panel textarea {
+  width: 100%;
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  margin-top: 0.35rem;
+}
+
 @media (max-width: 900px) {
   .app-shell {
     grid-template-columns: 1fr;

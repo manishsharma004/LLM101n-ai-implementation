@@ -426,7 +426,7 @@ export const chapters: Chapter[] = [
     syllabusTopic: 'datasets, data loading, synthetic data generation',
     readingTime: '45–55 min',
     premise: 'Storyteller quality depends on data. Load TinyStories excerpts, build train/val splits, and discuss synthetic story generation.',
-    labIds: ['dataset'],
+    labIds: ['dataset', 'eval'],
     tutorSeeds: ['Why deduplicate training data?', 'What is packing for transformer batches?'],
     parts: [
       {
@@ -517,7 +517,7 @@ export const chapters: Chapter[] = [
     syllabusTopic: 'supervised finetuning SFT, PEFT, LoRA, chat',
     readingTime: '50–60 min',
     premise: 'Teach the model chat format with supervised examples. LoRA updates low-rank adapters instead of full weights—feasible in-browser at tiny rank.',
-    labIds: ['sft-prompt', 'storyteller'],
+    labIds: ['lora', 'sft-prompt', 'storyteller'],
     tutorSeeds: ['What tokens delimit chat turns?', 'Why LoRA targets attention projections?'],
     parts: [
       {
@@ -533,6 +533,10 @@ export const chapters: Chapter[] = [
         paragraphs: [
           'Freeze base weights W; learn A·B with small rank r. Forward uses W + AB. Far fewer trainable parameters for demo fine-tunes.',
         ],
+        callout: {
+          tone: 'note',
+          body: 'Sim vs reality: the LoRA lab is linear algebra on toy matrices. Production SFT/LoRA runs on GPUs with billions of parameters; RLHF/PPO is not reproduced in this browser app.',
+        },
       },
       {
         id: 'search-sft',
