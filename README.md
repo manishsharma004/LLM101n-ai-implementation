@@ -9,6 +9,8 @@ npm install && npm run dev
 After merge to `master`, GitHub Actions (`.github/workflows/deploy.yml`) publishes to **GitHub Pages** at  
 `https://manishsharma004.github.io/LLM101n-ai-implementation/` (enable Pages → source: GitHub Actions in repo settings if needed).
 
+**Runtime architecture:** [interactive Archify map](public/architecture/llm101n-runtime.architecture.html) — regenerate with `bash scripts/architecture-deliver.sh` (see [docs/architecture/README.md](docs/architecture/README.md)).
+
 ---
 
 **!!! NOTE: the official Eureka Labs course does not yet exist. This repo follows the archived [karpathy/LLM101n](https://github.com/karpathy/LLM101n) syllabus. !!!**

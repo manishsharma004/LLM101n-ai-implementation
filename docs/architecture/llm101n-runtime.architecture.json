@@ -1,0 +1,414 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "LLM101n Storyteller — Browser Architecture",
+    "subtitle": "Static course SPA · Pyodide labs · search-engine AI assist · GitHub Pages",
+    "output": "public/architecture/llm101n-runtime.architecture.html",
+    "quality_profile": "standard",
+    "repository": {
+      "url": "https://github.com/manishsharma004/LLM101n-ai-implementation",
+      "revision": "de9754cc9cb4cc812b80c8f457b793d4df930d65"
+    },
+    "views": [
+      {
+        "id": "course-nav",
+        "label": "Course navigation",
+        "focus": [
+          "learner",
+          "github-pages",
+          "react-spa",
+          "chapter-ui"
+        ],
+        "note": "HashRouter SPA serves 17 syllabus chapters + appendix from static dist/."
+      },
+      {
+        "id": "micrograd-lab",
+        "label": "Micrograd training",
+        "focus": [
+          "chapter-ui",
+          "monaco",
+          "pyodide-lab",
+          "pyodide-cdn"
+        ],
+        "note": "Chapter 2 runs editable Python micrograd in Pyodide; Monaco is the editor."
+      },
+      {
+        "id": "storyteller",
+        "label": "Storyteller assist",
+        "focus": [
+          "chapter-ui",
+          "search-assist",
+          "search-providers"
+        ],
+        "note": "No in-app LLM API — prompts open Google, Duck.ai, or Perplexity in a new tab."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "learner",
+      "type": "external",
+      "label": "Learner browser",
+      "sublabel": "Chrome / Firefox / Safari",
+      "pos": [
+        30,
+        280
+      ],
+      "size": [
+        130,
+        60
+      ]
+    },
+    {
+      "id": "github-pages",
+      "type": "cloud",
+      "label": "GitHub Pages",
+      "sublabel": "static dist/",
+      "pos": [
+        220,
+        280
+      ],
+      "size": [
+        140,
+        60
+      ],
+      "sources": [
+        {
+          "path": ".github/workflows/deploy.yml",
+          "line": 1,
+          "label": "Pages deploy"
+        },
+        {
+          "path": "vite.config.ts",
+          "line": 5,
+          "label": "base ./"
+        }
+      ]
+    },
+    {
+      "id": "github-actions",
+      "type": "cloud",
+      "label": "GitHub Actions",
+      "sublabel": "typecheck · test · build",
+      "pos": [
+        220,
+        440
+      ],
+      "size": [
+        150,
+        60
+      ],
+      "sources": [
+        {
+          "path": ".github/workflows/deploy.yml",
+          "line": 34,
+          "label": "npm ci"
+        }
+      ]
+    },
+    {
+      "id": "react-spa",
+      "type": "frontend",
+      "label": "React SPA",
+      "sublabel": "HashRouter · sidebar",
+      "pos": [
+        420,
+        280
+      ],
+      "size": [
+        140,
+        60
+      ],
+      "sources": [
+        {
+          "path": "src/main.tsx",
+          "line": 1,
+          "label": "bootstrap"
+        },
+        {
+          "path": "src/App.tsx",
+          "line": 1,
+          "label": "routes"
+        }
+      ]
+    },
+    {
+      "id": "chapter-ui",
+      "type": "frontend",
+      "label": "Chapter shell",
+      "sublabel": "prose · labs · tutor",
+      "pos": [
+        620,
+        280
+      ],
+      "size": [
+        150,
+        60
+      ],
+      "sources": [
+        {
+          "path": "src/pages/ChapterPage.tsx",
+          "line": 1,
+          "label": "chapter reader"
+        },
+        {
+          "path": "src/content/chapters.ts",
+          "line": 1,
+          "label": "syllabus data"
+        }
+      ]
+    },
+    {
+      "id": "monaco",
+      "type": "frontend",
+      "label": "Monaco editor",
+      "sublabel": "Python lab code",
+      "pos": [
+        620,
+        120
+      ],
+      "size": [
+        140,
+        60
+      ],
+      "sources": [
+        {
+          "path": "src/components/MonacoEditor.tsx",
+          "line": 1,
+          "label": "editor widget"
+        }
+      ]
+    },
+    {
+      "id": "pyodide-lab",
+      "type": "frontend",
+      "label": "PyodideCodeLab",
+      "sublabel": "run_snippet · stdout",
+      "pos": [
+        820,
+        120
+      ],
+      "size": [
+        150,
+        60
+      ],
+      "sources": [
+        {
+          "path": "src/components/PyodideCodeLab.tsx",
+          "line": 1,
+          "label": "run training"
+        },
+        {
+          "path": "src/labs/microgradStarterPython.ts",
+          "line": 1,
+          "label": "starter code"
+        }
+      ]
+    },
+    {
+      "id": "pyodide-cdn",
+      "type": "cloud",
+      "label": "jsDelivr CDN",
+      "sublabel": "CPython WASM",
+      "pos": [
+        1020,
+        120
+      ],
+      "size": [
+        130,
+        60
+      ]
+    },
+    {
+      "id": "browser-labs",
+      "type": "frontend",
+      "label": "TS browser labs",
+      "sublabel": "bigram · BPE · attention",
+      "pos": [
+        820,
+        280
+      ],
+      "size": [
+        160,
+        60
+      ],
+      "sources": [
+        {
+          "path": "src/components/LabPanel.tsx",
+          "line": 1,
+          "label": "lab router"
+        }
+      ]
+    },
+    {
+      "id": "static-data",
+      "type": "database",
+      "label": "Static assets",
+      "sublabel": "TinyStories sample",
+      "pos": [
+        620,
+        440
+      ],
+      "size": [
+        150,
+        60
+      ],
+      "sources": [
+        {
+          "path": "public/data/tinystories-sample.txt",
+          "line": 1,
+          "label": "corpus shard"
+        }
+      ]
+    },
+    {
+      "id": "search-assist",
+      "type": "frontend",
+      "label": "Search assist",
+      "sublabel": "buildSearchEngineUrls",
+      "pos": [
+        900,
+        440
+      ],
+      "size": [
+        150,
+        60
+      ],
+      "sources": [
+        {
+          "path": "src/lib/llm/providers.ts",
+          "line": 1,
+          "label": "prompt + redirect"
+        }
+      ]
+    },
+    {
+      "id": "search-providers",
+      "type": "external",
+      "label": "Search AI tabs",
+      "sublabel": "Google · Duck.ai · Perplexity",
+      "pos": [
+        1100,
+        440
+      ],
+      "size": [
+        160,
+        60
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "learner-pages",
+      "from": "learner",
+      "to": "github-pages",
+      "label": "HTTPS GET",
+      "variant": "emphasis"
+    },
+    {
+      "id": "pages-spa",
+      "from": "github-pages",
+      "to": "react-spa",
+      "label": "JS/CSS bundle",
+      "labelDy": 54
+    },
+    {
+      "id": "spa-chapter",
+      "from": "react-spa",
+      "to": "chapter-ui",
+      "label": "HashRouter"
+    },
+    {
+      "id": "chapter-monaco",
+      "from": "chapter-ui",
+      "to": "monaco",
+      "label": "Ch.2 micrograd",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "monaco-pyodide",
+      "from": "monaco",
+      "to": "pyodide-lab",
+      "label": "user code"
+    },
+    {
+      "id": "pyodide-cdn",
+      "from": "pyodide-lab",
+      "to": "pyodide-cdn",
+      "label": "load runtime",
+      "labelDy": 54
+    },
+    {
+      "id": "chapter-labs",
+      "from": "chapter-ui",
+      "to": "browser-labs",
+      "label": "in-tab demos",
+      "labelAt": [795, 268]
+    },
+    {
+      "id": "chapter-data",
+      "from": "chapter-ui",
+      "to": "static-data",
+      "label": "fetch shard",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 24
+    },
+    {
+      "id": "chapter-search",
+      "from": "chapter-ui",
+      "to": "search-assist",
+      "label": "Storyteller / tutor",
+      "labelDy": 54
+    },
+    {
+      "id": "search-external",
+      "from": "search-assist",
+      "to": "search-providers",
+      "label": "window.open",
+      "variant": "emphasis",
+      "labelDy": 54
+    },
+    {
+      "id": "actions-pages",
+      "from": "github-actions",
+      "to": "github-pages",
+      "label": "publish dist",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Static delivery",
+      "items": [
+        "Vite builds a static SPA; no application server",
+        "GitHub Actions runs typecheck, tests, and deploys dist/ to Pages",
+        "HashRouter works on project Pages URLs without server routing"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Learning runtimes",
+      "items": [
+        "TypeScript labs: bigram, BPE, attention, quant, workers (toy DDP)",
+        "Pyodide + Monaco: real Python micrograd training in chapter 2",
+        "TinyStories sample served from public/data/"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "AI without backend",
+      "items": [
+        "Storyteller builds System/User prompts locally",
+        "Search engines provide free inference in a new tab (system-design-copilot pattern)",
+        "No API keys or LLM calls from this repository"
+      ]
+    }
+  ]
+}
