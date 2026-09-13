@@ -286,6 +286,13 @@ button.primary {
   margin: 1rem 0;
 }
 
+.code-block figcaption .code-lang {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
 .progress-panel textarea {
   width: 100%;
   font-family: ui-monospace, monospace;
