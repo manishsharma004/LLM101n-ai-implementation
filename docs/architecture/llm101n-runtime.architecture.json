@@ -31,7 +31,7 @@
           "pyodide-lab",
           "pyodide-cdn"
         ],
-        "note": "Chapter 2 runs editable Python micrograd in Pyodide; Monaco is the editor."
+        "note": "Chapter labs run editable Python in Pyodide (Monaco editor); micrograd is chapter 2."
       },
       {
         "id": "storyteller",
@@ -184,7 +184,7 @@
       "id": "pyodide-lab",
       "type": "frontend",
       "label": "PyodideCodeLab",
-      "sublabel": "run_snippet · stdout",
+      "sublabel": "bigram · BPE · micrograd",
       "pos": [
         820,
         120
@@ -202,7 +202,12 @@
         {
           "path": "src/labs/microgradStarterPython.ts",
           "line": 1,
-          "label": "starter code"
+          "label": "micrograd starter"
+        },
+        {
+          "path": "src/labs/pythonLabStarters.ts",
+          "line": 1,
+          "label": "chapter lab starters"
         }
       ]
     },
@@ -218,27 +223,6 @@
       "size": [
         130,
         60
-      ]
-    },
-    {
-      "id": "browser-labs",
-      "type": "frontend",
-      "label": "TS browser labs",
-      "sublabel": "bigram · BPE · attention",
-      "pos": [
-        820,
-        280
-      ],
-      "size": [
-        160,
-        60
-      ],
-      "sources": [
-        {
-          "path": "src/components/LabPanel.tsx",
-          "line": 1,
-          "label": "lab router"
-        }
       ]
     },
     {
@@ -323,7 +307,7 @@
       "id": "chapter-monaco",
       "from": "chapter-ui",
       "to": "monaco",
-      "label": "Ch.2 micrograd",
+      "label": "Python labs",
       "fromSide": "top",
       "toSide": "bottom"
     },
@@ -343,11 +327,13 @@
     {
       "id": "chapter-labs",
       "from": "chapter-ui",
-      "to": "browser-labs",
-      "label": "in-tab demos",
+      "to": "pyodide-lab",
+      "label": "LabPanel",
+      "fromSide": "right",
+      "toSide": "left",
       "labelAt": [
-        795,
-        268
+        720,
+        200
       ]
     },
     {
@@ -399,8 +385,7 @@
       "dot": "emerald",
       "title": "Learning runtimes",
       "items": [
-        "TypeScript labs: bigram, BPE, attention, quant, workers (toy DDP)",
-        "Pyodide + Monaco: real Python micrograd training in chapter 2",
+        "Pyodide + Monaco: editable Python for all in-tab labs (bigram, BPE, attention, quant, workers, micrograd)",
         "TinyStories sample served from public/data/"
       ]
     },

@@ -10,9 +10,19 @@ type Props = {
   title: string
   description?: string
   starterCode: string
+  runLabel?: string
+  hint?: string
+  editorMinLines?: number
 }
 
-export function PyodideCodeLab({ title, description, starterCode }: Props) {
+export function PyodideCodeLab({
+  title,
+  description,
+  starterCode,
+  runLabel = 'Run code',
+  hint = 'Edit the Python below, then run.',
+  editorMinLines = 14,
+}: Props) {
   const { pyodide, phase, message, error, retry } = usePyodide()
   const [code, setCode] = useState(starterCode)
   const [output, setOutput] = useState('')
@@ -63,13 +73,11 @@ export function PyodideCodeLab({ title, description, starterCode }: Props) {
       <h3>{title}</h3>
       {description ? <p className="muted">{description}</p> : null}
       <RuntimeBanner phase={phase} message={message} error={error} onRetry={retry} />
-      <p className="lab-hint">
-        Edit the Python below (micrograd + training loop), then <strong>Run training</strong>.
-      </p>
-      <MonacoEditor value={code} onChange={setCode} language="python" minLines={14} ariaLabel="Micrograd Python" />
+      <p className="lab-hint">{hint}</p>
+      <MonacoEditor value={code} onChange={setCode} language="python" minLines={editorMinLines} ariaLabel="Python lab code" />
       <div className="lab-actions">
         <button type="button" className="primary" disabled={!ready || running} onClick={run}>
-          {running ? 'Running…' : ready ? 'Run training' : 'Loading Python…'}
+          {running ? 'Running…' : ready ? runLabel : 'Loading Python…'}
         </button>
         <button type="button" disabled={running} onClick={reset}>Reset starter code</button>
       </div>
