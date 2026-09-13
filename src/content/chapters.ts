@@ -21,6 +21,7 @@ export const chapters: Chapter[] = [
         id: 'what-is-lm',
         heading: 'Language modeling is next-token prediction',
         paragraphs: [
+          'The figures below state the bigram objective in standard notation (NLL, perplexity, Markov chain).',
           'A language model assigns a probability distribution over continuations. Given a prefix, it outputs scores for what could come next. Training does not require labels from a human grader: the next symbol in the corpus is the target. That self-supervision is why web-scale text can train enormous models.',
           'For a Storyteller on TinyStories, the prefix might be "Once upon a". The model should favor child-friendly continuations such as "time" rather than random Unicode. A bigram model only looks at the immediately previous symbol, so it cannot remember the title or characters from earlier in the paragraph. That limitation is the motivation for longer contexts in later chapters.',
           'We measure fit with negative log-likelihood (NLL): assign probability p to the true next symbol and accumulate −log p. Lower NLL means the model is less surprised by the data. Perplexity is exp(average NLL); interpret it as the effective branching factor per step. A bigram that always guesses uniformly over V symbols has perplexity ≈ V.',

@@ -3,6 +3,8 @@ import { appendixTopics, getChapterByNumber, getChapterBySlug } from '../content
 import { ChapterProgress } from '../components/ChapterProgress'
 import { LabPanel } from '../components/LabPanel'
 import { SearchAssistPanel } from '../components/SearchAssistPanel'
+import { ChapterFigures } from '../components/figures/ChapterFigures'
+import { appendixFigures, figuresForPart } from '../content/chapterFigures'
 
 export function ChapterPage() {
   const { slug } = useParams()
@@ -32,6 +34,7 @@ export function ChapterPage() {
           {part.paragraphs.map((p, i) => (
             <p key={i}>{p}</p>
           ))}
+          <ChapterFigures figures={[...(part.figures ?? []), ...figuresForPart(chapter.id, part.id)]} />
           {part.keyTerms?.length ? (
             <dl className="terms">
               {part.keyTerms.map((t) => (
@@ -97,6 +100,12 @@ export function AppendixPage() {
         <section key={topic.id} className="part">
           <h2>{topic.title}</h2>
           <p>{topic.summary}</p>
+          <ChapterFigures
+            figures={[
+              ...(topic.figures ?? []),
+              ...(appendixFigures[topic.id] ?? []),
+            ]}
+          />
           <ul>
             {topic.bullets.map((b) => (
               <li key={b}>{b}</li>
