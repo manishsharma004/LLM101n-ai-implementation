@@ -43,21 +43,25 @@ export const chapters: Chapter[] = [
           'Raw counts fail on unseen pairs: probability zero means infinite negative log-likelihood. Additive smoothing (e.g. +1 to every count) or backoff to unigrams keeps sampling stable. The lab lets you compare unsmoothed vs smoothed generation on a bundled TinyStories excerpt.',
         ],
         code: {
-          language: 'typescript',
+          language: 'python',
           caption: 'Bigram row normalization',
-          body: `function rowProbs(counts: Map<string, number>, context: string, alpha = 1) {
-  const vocab = [...new Set([...counts.keys()].flatMap(k => k.split('|')))]
-  let total = alpha * vocab.length
-  const row = new Map<string, number>()
-  for (const [pair, c] of counts) {
-    const [a, b] = pair.split('|')
-    if (a !== context) continue
-    row.set(b, (row.get(b) ?? 0) + c)
-    total += c
-  }
-  for (const [b, c] of row) row.set(b, (c + alpha) / total)
-  return row
-}`,
+          body: `def row_probs(counts: dict[str, int], context: str, alpha: float = 1.0) -> dict[str, float]:
+    vocab = set()
+    for key in counts:
+        a, b = key.split("|", 1)
+        vocab.add(a)
+        vocab.add(b)
+    total = alpha * len(vocab)
+    row: dict[str, float] = {}
+    for key, c in counts.items():
+        a, b = key.split("|", 1)
+        if a != context:
+            continue
+        row[b] = row.get(b, 0.0) + c
+        total += c
+    for b in list(row):
+        row[b] = (row[b] + alpha) / total
+    return row`,
         },
       },
       {
@@ -83,7 +87,7 @@ export const chapters: Chapter[] = [
     syllabusTopic: 'machine learning, backpropagation',
     readingTime: '45–55 min',
     premise:
-      'Neural networks learn by gradient descent on a scalar loss. Micrograd implements autograd on a tiny computation graph so every backward step is visible—no PyTorch required in the browser lab (TypeScript port).',
+      'Neural networks learn by gradient descent on a scalar loss. Micrograd implements autograd on a tiny computation graph so every backward step is visible—no PyTorch required; the browser lab runs real Python in Pyodide.',
     labIds: ['micrograd'],
     tutorSeeds: ['What is the chain rule in a computation graph?', 'Why do we need backward() in topological order?'],
     parts: [
@@ -107,15 +111,14 @@ export const chapters: Chapter[] = [
           'The same loop will train embedding tables and transformer weights later; only the forward graph grows.',
         ],
         code: {
-          language: 'typescript',
-          body: `for (let step = 0; step < 200; step++) {
-  const pred = w1.mul(x).add(b)
-  const loss = pred.sub(y).pow(2)
-  loss.backward()
-  w1.data -= lr * w1.grad
-  b.data -= lr * b.grad
-  zeroGrad(w1, b)
-}`,
+          language: 'python',
+          body: `for step in range(200):
+    pred = w1 * x + b
+    loss = (pred - y) ** 2
+    loss.backward()
+    w1.data -= lr * w1.grad
+    b.data -= lr * b.grad
+    zero_grad(w1, b)`,
         },
       },
       {
@@ -156,7 +159,7 @@ export const chapters: Chapter[] = [
         id: 'matmul',
         heading: 'Matmul is the workhorse',
         paragraphs: [
-          'Linear layers are matrix multiplication plus bias. In the browser you implement matmul in TypeScript first; WebGPU chapters accelerate the same shapes. Track dimensions obsessively: (batch, context·emb) @ (context·emb, vocab) for logits.',
+          'Linear layers are matrix multiplication plus bias. In the browser lab you implement matmul in Python (NumPy-style lists); WebGPU chapters accelerate the same shapes. Track dimensions obsessively: (batch, context·emb) @ (context·emb, vocab) for logits.',
         ],
       },
       {
@@ -246,7 +249,7 @@ export const chapters: Chapter[] = [
     subtitle: 'minBPE, byte pair encoding',
     syllabusTopic: 'minBPE, byte pair encoding',
     readingTime: '40–50 min',
-    premise: 'Characters are simple but inefficient; BPE merges frequent pairs into subwords. Implement merge training and encode/decode in TypeScript (minBPE spirit).',
+    premise: 'Characters are simple but inefficient; BPE merges frequent pairs into subwords. Implement merge training and encode/decode in Python (minBPE spirit).',
     labIds: ['bpe'],
     tutorSeeds: ['Why byte-level BPE handles UTF-8?', 'How does vocab size affect compression?'],
     parts: [
@@ -322,7 +325,7 @@ export const chapters: Chapter[] = [
     parts: [
       {
         id: 'cpu',
-        heading: 'CPU baseline in TypeScript',
+        heading: 'CPU baseline in Python',
         paragraphs: [
           'Nested loops or typed arrays for matmul. Good for tiny shapes and debugging numerical issues.',
         ],
@@ -651,7 +654,7 @@ export const appendixTopics: AppendixTopic[] = [
   {
     id: 'langs',
     title: 'Programming languages: Assembly, C, Python',
-    summary: 'LLM101n names three implementation layers; this browser course uses TypeScript + Pyodide (Python) + optional WASM C.',
+    summary: 'LLM101n names three implementation layers; this browser course uses Pyodide (Python) for labs, TypeScript for the SPA shell, and optional WASM C.',
     bullets: [
       'Python chapters map to Pyodide labs and exported .py snippets.',
       'C hot paths can ship as WASM modules for matmul kernels (advanced optional track).',
