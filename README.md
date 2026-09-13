@@ -1,8 +1,14 @@
 # LLM101n: Let's build a Storyteller
 
+**Browser implementation** — interactive syllabus, in-tab labs, and a Storyteller UI. No server training; AI help via [search-engine redirects](https://github.com/manishsharma004/system-design-copilot) (Google, Duck.ai, Perplexity).
+
+```bash
+npm install && npm run dev
+```
+
 ---
 
-**!!! NOTE: this course does not yet exist. It is current being developed by [Eureka Labs](https://eurekalabs.ai). Until it is ready I am archiving this repo !!!**
+**!!! NOTE: the official Eureka Labs course does not yet exist. This repo follows the archived [karpathy/LLM101n](https://github.com/karpathy/LLM101n) syllabus. !!!**
 
 ---
 
