@@ -44,7 +44,10 @@ export function ChapterPage() {
           ) : null}
           {part.code ? (
             <figure className="code-block">
-              {part.code.caption ? <figcaption>{part.code.caption}</figcaption> : null}
+              <figcaption>
+                {part.code.caption ? `${part.code.caption} · ` : null}
+                <span className="code-lang">{part.code.language}</span>
+              </figcaption>
               <pre><code>{part.code.body}</code></pre>
             </figure>
           ) : null}
