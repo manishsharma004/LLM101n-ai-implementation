@@ -38,6 +38,10 @@ export function HomePage() {
         <Link to="/appendix">Appendix topics</Link> ·{' '}
         <a href="https://huggingface.co/datasets/roneneldan/TinyStories" target="_blank" rel="noreferrer">
           TinyStories dataset
+        </a>{' '}
+        ·{' '}
+        <a href="./architecture/llm101n-runtime.architecture.html" target="_blank" rel="noreferrer">
+          Runtime architecture (Archify)
         </a>
       </p>
     </div>
