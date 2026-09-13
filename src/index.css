@@ -293,6 +293,63 @@ button.primary {
   color: var(--muted);
 }
 
+.chapter-figures {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin: 1rem 0 1.25rem;
+}
+
+.math-block,
+.mermaid-block,
+.chart-block {
+  background: var(--panel, #1a1d24);
+  border: 1px solid var(--border, #2a2f3a);
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.math-block .math-render {
+  text-align: center;
+  font-size: 1.05rem;
+}
+
+.math-block figcaption,
+.mermaid-block figcaption,
+.chart-block figcaption {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.mermaid-svg svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+}
+
+.chart-legend .swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 0.35rem;
+}
+
+.diagram-error {
+  color: #f87171;
+}
+
 .progress-panel textarea {
   width: 100%;
   font-family: ui-monospace, monospace;
