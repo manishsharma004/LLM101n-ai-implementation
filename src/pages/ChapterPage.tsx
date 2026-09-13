@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import { appendixTopics, getChapterByNumber, getChapterBySlug } from '../content/chapters'
+import { ChapterProgress } from '../components/ChapterProgress'
 import { LabPanel } from '../components/LabPanel'
 import { SearchAssistPanel } from '../components/SearchAssistPanel'
 
@@ -58,6 +59,8 @@ export function ChapterPage() {
           ) : null}
         </section>
       ))}
+
+      <ChapterProgress chapterId={chapter.id} />
 
       <LabPanel labIds={chapter.labIds} />
 

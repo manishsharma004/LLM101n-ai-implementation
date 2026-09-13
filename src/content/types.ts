@@ -12,6 +12,8 @@ export type LabId =
   | 'kvcache'
   | 'quantize'
   | 'sft-prompt'
+  | 'lora'
+  | 'eval'
   | 'dpo-prompt'
   | 'storyteller'
   | 'multimodal'
