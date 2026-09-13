@@ -11,11 +11,15 @@ Static Vite + React app implementing the [karpathy/LLM101n](https://github.com/k
 - Build: `npm run build`
 - Test: `npm test`
 
+## Agent instructions (owner preference)
+
+- **Do not use Cursor subagents** (`Task` tool: `computerUse`, `explore`, `debug`, `generalPurpose`, `bugbot`, etc.). They run on separate Claude models and consume the owner’s API quota.
+- Do all work in the main agent: shell commands, direct file edits, `curl`/preview servers, and existing unit tests for verification. Skip GUI walkthrough videos unless the user explicitly asks and allows subagents.
+
 ## Conventions
 
 - Chapter prose: `src/content/chapters.ts`
-- Labs: `src/labs/` + `src/components/LabPanel.tsx`
-- Chapter 2 micrograd: `PyodideCodeLab` + Monaco (`monaco-editor`) + starter in `src/labs/microgradStarterPython.ts`
+- Labs: `src/labs/pythonLabStarters.ts` + `src/labs/microgradStarterPython.ts` + `src/components/LabPanel.tsx` → `PyodideCodeLab` + Monaco
 - Architecture map: `bash scripts/architecture-deliver.sh` ([Archify](https://github.com/tt-a1i/archify)) → `public/architecture/llm101n-runtime.architecture.html`
 - Search prompts: `src/lib/llm/providers.ts`
 - Deploy `dist/` to static hosting (`base: './'`, `HashRouter` for GitHub Pages).
