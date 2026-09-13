@@ -8,9 +8,9 @@ export const chapters: Chapter[] = [
     title: 'Bigram Language Model',
     subtitle: 'Language modeling from counts',
     syllabusTopic: 'language modeling',
-    readingTime: '35–45 min',
+    readingTime: '45–55 min',
     premise:
-      'Before transformers, language models were often just tables of probabilities. A bigram model asks: given one character (or token), what comes next? You will train counts in the browser, sample stories, and see why smoothing matters on TinyStories-style text.',
+      'Before transformers, language models were often just tables of probabilities. A bigram model asks: given one character (or token), what comes next? You will train counts in the browser, sample stories, measure perplexity on a hold-out split, and see why smoothing and sampling knobs matter on TinyStories-style text.',
     labIds: ['bigram', 'storyteller'],
     tutorSeeds: [
       'Why is a bigram model a Markov chain with order 1?',
@@ -23,6 +23,8 @@ export const chapters: Chapter[] = [
         paragraphs: [
           'A language model assigns a probability distribution over continuations. Given a prefix, it outputs scores for what could come next. Training does not require labels from a human grader: the next symbol in the corpus is the target. That self-supervision is why web-scale text can train enormous models.',
           'For a Storyteller on TinyStories, the prefix might be "Once upon a". The model should favor child-friendly continuations such as "time" rather than random Unicode. A bigram model only looks at the immediately previous symbol, so it cannot remember the title or characters from earlier in the paragraph. That limitation is the motivation for longer contexts in later chapters.',
+          'We measure fit with negative log-likelihood (NLL): assign probability p to the true next symbol and accumulate −log p. Lower NLL means the model is less surprised by the data. Perplexity is exp(average NLL); interpret it as the effective branching factor per step. A bigram that always guesses uniformly over V symbols has perplexity ≈ V.',
+          'Character models are pedagogical: small vocabularies make tables visible. Production systems use subword tokens (chapter 6), but the training objective is the same—predict the next token from context.',
         ],
         keyTerms: [
           { term: 'language model', definition: 'A model that predicts the next token (or character) given prior context.' },
@@ -40,7 +42,8 @@ export const chapters: Chapter[] = [
         heading: 'Train by counting, then normalize rows',
         paragraphs: [
           'Scan the corpus once. For each adjacent pair (a, b), increment count[a][b]. Each row count[a][·] becomes a conditional distribution after normalization. Implementation is a sparse map or dense matrix if the alphabet is small (bytes or ASCII).',
-          'Raw counts fail on unseen pairs: probability zero means infinite negative log-likelihood. Additive smoothing (e.g. +1 to every count) or backoff to unigrams keeps sampling stable. The lab lets you compare unsmoothed vs smoothed generation on a bundled TinyStories excerpt.',
+          'Raw counts fail on unseen pairs: probability zero means infinite negative log-likelihood. Additive smoothing (e.g. +1 to every count) or backoff to unigrams keeps sampling stable. The lab trains on a bundled TinyStories shard and exposes temperature, top-k, and greedy decoding—generation is not only about counts, but how you turn probabilities into choices.',
+          'Worked intuition: if after context "e" you saw "r" 40 times and "x" once among 50 continuations, the raw estimate is P(r|e)=0.8. With add-α smoothing toward a uniform row, rare letters keep non-zero mass so validation text with "ex" does not explode NLL. Tuning α trades memorization vs generalization on tiny data.',
         ],
         code: {
           language: 'python',
@@ -68,7 +71,8 @@ export const chapters: Chapter[] = [
         id: 'sample',
         heading: 'Sample stories by rolling the dice',
         paragraphs: [
-          'Start from a seed string. Repeatedly sample the next character from the conditional distribution given the last character. Stop at max length or when you hit a chosen end symbol. Because memory is one step, output often drifts into repetitive loops ("the the the").',
+          'Start from a seed string. Repeatedly sample the next character from the conditional distribution given the last character. Stop at max length or when you hit a chosen end symbol. Because memory is one step, output often drifts into repetitive loops ("the the the") or loses plot—compare greedy decoding (always argmax) vs stochastic sampling in the lab.',
+          'Temperature scales how sharply you read probabilities: T→0 approaches greedy; T>1 flattens the distribution and increases diversity at the cost of coherence. Top-k truncates the tail before sampling, a cheap guardrail against sampling a rare punctuation character mid-word.',
           'Use the Storyteller panel with search-engine assist: your locally trained bigram can seed text, then you can ask an external AI (via Google, Duck.ai, or Perplexity) to rewrite the draft into a coherent TinyStories-style tale—without hosting inference in this app.',
         ],
         callout: {
@@ -96,7 +100,14 @@ export const chapters: Chapter[] = [
         heading: 'Scalars, parents, and local gradients',
         paragraphs: [
           'Each value knows how it was produced (+, *, tanh, etc.) and which values contributed. During backward(), each node applies the chain rule to pass gradient to its parents. The result: ∂loss/∂w for every parameter used in the forward pass.',
+          'Reverse-mode AD walks the graph from loss to inputs once, reusing intermediate ∂loss/∂node values. For a scalar loss and thousands of parameters, that beats forward-mode (which would need one pass per parameter). Micrograd stores the graph implicitly via parent pointers—frameworks batch this into tensor ops.',
           'This is exactly what larger frameworks do—only hidden behind tensors. Building it once demystifies "loss.backward()" when you reach transformers.',
+        ],
+        checkYourself: [
+          {
+            prompt: 'Why must backward() visit nodes in topological order from loss to leaves?',
+            reveal: 'A node’s gradient depends on downstream gradients already being computed; children must be processed before their parents in the reverse topological order.',
+          },
         ],
         keyTerms: [
           { term: 'autograd', definition: 'Automatic differentiation that records operations for reverse-mode gradient computation.' },
@@ -107,8 +118,9 @@ export const chapters: Chapter[] = [
         id: 'train-loop',
         heading: 'Fit a toy function with SGD',
         paragraphs: [
-          'Pick a loss (MSE for regression). Forward → backward → update weights with learning rate η. Log loss per step in the lab chart. Watch overshoot when η is too large and stagnation when η is too small.',
-          'The same loop will train embedding tables and transformer weights later; only the forward graph grows.',
+          'Pick a loss (MSE for regression). Forward → backward → update weights with learning rate η. Log loss per step in the lab output. Watch overshoot when η is too large (loss spikes) and stagnation when η is too small (loss flatlines).',
+          'Always zero gradients after each step unless you intentionally accumulate—stale grads are a common bug when porting loops from pseudocode to PyTorch.',
+          'The same loop will train embedding tables and transformer weights later; only the forward graph grows. Language modeling swaps MSE for cross-entropy over vocab logits.',
         ],
         code: {
           language: 'python',
@@ -126,6 +138,7 @@ export const chapters: Chapter[] = [
         heading: 'Bridge to language modeling',
         paragraphs: [
           'A bigram could be learned by softmax + cross-entropy instead of counting, if you parameterize rows with logits. That is the bridge from tabular models to neural LMs in chapter 3.',
+          'Counting is maximum likelihood on a discrete table; neural nets learn the same conditional distributions but share structure across contexts via embeddings and depth. When data is sparse, neural models can generalize; when data is abundant and tabular, counts can be hard to beat.',
         ],
         callout: { tone: 'interview', body: 'Be ready to explain reverse-mode AD vs forward-mode and why deep learning prefers reverse for many parameters.' },
       },
@@ -138,9 +151,9 @@ export const chapters: Chapter[] = [
     title: 'N-gram Model & MLP',
     subtitle: 'MLP, matmul, GELU',
     syllabusTopic: 'multi-layer perceptron, matmul, gelu',
-    readingTime: '50–60 min',
+    readingTime: '60–75 min',
     premise:
-      'Fix a context window of previous characters, embed them, concatenate or pool, and pass through an MLP with GELU activations. This is makemore-style thinking in miniature.',
+      'Fix a context window of previous characters, embed them, concatenate, and pass through an MLP with GELU activations. The lab runs real SGD steps on a corpus shard—this is makemore-style thinking in miniature, not a diagram-only chapter.',
     labIds: ['mlp'],
     tutorSeeds: ['Why does GELU smooth ReLU?', 'How does context length trade off capacity vs parameters?'],
     parts: [
@@ -148,26 +161,49 @@ export const chapters: Chapter[] = [
         id: 'embed',
         heading: 'Embeddings turn symbols into vectors',
         paragraphs: [
-          'Each character id maps to a learnable vector. Stacking contexts gives a fat vector fed into linear layers. The network learns features like "vowel after consonant" without hand-written rules.',
+          'Each character id maps to a learnable vector. Stacking contexts gives a fat vector fed into linear layers. The network learns features like "vowel after consonant" or "space after word fragment" without hand-written rules.',
+          'Embeddings are not magic semantics—they start random and become useful because the loss forces them to predict co-occurrence structure. Similar characters (vowels, punctuation) often end up nearby in embedding space after training.',
         ],
         keyTerms: [
           { term: 'embedding', definition: 'A lookup table from discrete token ids to continuous vectors.' },
           { term: 'GELU', definition: 'Gaussian Error Linear Unit; smooth nonlinearity used in GPT-family models.' },
+          { term: 'context window', definition: 'How many prior tokens the model conditions on; trades memory and compute for capacity.' },
+        ],
+        checkYourself: [
+          {
+            prompt: 'Why concatenate embeddings instead of averaging them for a fixed context length?',
+            reveal: 'Concatenation preserves position-specific information within the window; averaging would collapse "cat" vs "tac" style distinctions unless you add position features elsewhere.',
+          },
         ],
       },
       {
         id: 'matmul',
         heading: 'Matmul is the workhorse',
         paragraphs: [
-          'Linear layers are matrix multiplication plus bias. In the browser lab you implement matmul in Python (NumPy-style lists); WebGPU chapters accelerate the same shapes. Track dimensions obsessively: (batch, context·emb) @ (context·emb, vocab) for logits.',
+          'Linear layers are matrix multiplication plus bias. In the browser lab you implement matmul in Python (NumPy-style lists); WebGPU chapters accelerate the same shapes. Track dimensions obsessively: input dim = context × emb_dim, hidden dim H, output dim = vocab for logits.',
+          'A two-layer MLP block is x → W₁x + b₁ → GELU → W₂h + b₂. Parameter count scales with (input·H + H·output). Wider H learns richer features but needs more data and regularization on small shards.',
         ],
+        code: {
+          language: 'python',
+          caption: 'Cross-entropy on one next-character target',
+          body: `import math
+logits = model(context_ids)  # length V
+target = next_char_id
+probs = softmax(logits)
+loss = -math.log(probs[target] + 1e-9)`,
+        },
       },
       {
         id: 'train-chars',
         heading: 'Train on a TinyStories shard',
         paragraphs: [
-          'The dataset lab loads a public-domain excerpt. Cross-entropy loss trains logits for the next character. Generation improves over bigrams because multiple prior characters influence the prediction.',
+          'Cross-entropy loss trains logits for the next character. Backprop updates embeddings and both weight matrices; the lab logs loss from early to late steps so you can see whether the shard is large enough to learn anything beyond noise.',
+          'Generation improves over bigrams because multiple prior characters influence the prediction—but with only thousands of characters of data, do not expect GPT-quality prose. Use chapter 11 eval habits: hold out lines and ask whether validation loss tracks training.',
         ],
+        callout: {
+          tone: 'note',
+          body: 'Sim vs reality: this MLP is a single hidden layer on characters. GPT-2 stacks dozens of transformer blocks on subword tokens with billions of parameters. The training loop shape is the same; scale is not.',
+        },
       },
     ],
   },
@@ -178,8 +214,8 @@ export const chapters: Chapter[] = [
     title: 'Attention',
     subtitle: 'Softmax, positional encoding',
     syllabusTopic: 'attention, softmax, positional encoder',
-    readingTime: '55–65 min',
-    premise: 'Attention lets every position read every other position (with causal masking for decoders). You will implement scaled dot-product attention and visualize weights.',
+    readingTime: '65–80 min',
+    premise: 'Attention lets every position read every other position (with causal masking for decoders). You will implement scaled dot-product attention, read an ASCII heatmap of weights, and connect masking to autoregressive generation.',
     labIds: ['attention'],
     tutorSeeds: ['Why divide by sqrt(d_k)?', 'What breaks if you remove positional encodings?'],
     parts: [
@@ -187,21 +223,34 @@ export const chapters: Chapter[] = [
         id: 'qkv',
         heading: 'Queries, keys, values',
         paragraphs: [
-          'For each position, learn linear maps to query, key, and value vectors. Scores = QKᵀ / √d. Softmax over keys yields convex weights; weighted sum of values is the output. Causal LM masking sets forbidden positions to −∞ before softmax.',
+          'For each position, learn linear maps to query, key, and value vectors. Scores = QKᵀ / √d. Softmax over keys yields convex weights; weighted sum of values is the output. Causal LM masking sets forbidden positions to −∞ before softmax so token i cannot attend to future tokens j > i.',
+          'Scaling by √d keeps dot products from growing with head dimension so softmax does not saturate into one-hot weights. Multi-head attention runs h parallel heads with smaller d_k each, then concatenates—different heads can specialize (local syntax vs long-range coreference).',
+        ],
+        keyTerms: [
+          { term: 'scaled dot-product attention', definition: 'Softmax(QKᵀ/√d)V mixing values according to query–key similarity.' },
+          { term: 'causal mask', definition: 'Upper-triangular forbidden region so decoders only see past and present.' },
+        ],
+        checkYourself: [
+          {
+            prompt: 'What happens to attention weights if you remove the √d scale with large d_k?',
+            reveal: 'Dot products grow in magnitude; softmax becomes peaked (near one-hot), gradients shrink, and training can become unstable.',
+          },
         ],
       },
       {
         id: 'positions',
         heading: 'Positions are not in the symbols',
         paragraphs: [
-          'Attention is permutation-equivariant without position info. Add sinusoidal encodings (GPT-2 style) or learned position embeddings so "cat sat" ≠ "sat cat". The lab plots position encodings for small dimensions.',
+          'Attention is permutation-equivariant without position info: shuffling token order shuffles outputs the same way. GPT-2 adds learned position embeddings to token embeddings before the stack. Sinusoidal encodings (original Transformer) bake relative structure via sin/cos at different frequencies.',
+          'Modern Llama-style models often use RoPE (rotary position embeddings) instead of additive positions—see appendix architectures. For this chapter, remember: positions are explicit inputs; the attention math alone does not know left-to-right order.',
         ],
       },
       {
         id: 'viz',
         heading: 'Read the heatmap like an X-ray',
         paragraphs: [
-          'Bright cells show where the model looks when predicting the next token. In early training on stories, local diagonal structure is common; later heads specialize (syntax, names).',
+          'The lab prints a causal weight matrix as numbers and an ASCII heatmap (# vs .). Bright cells show where a query position allocates mass over keys. On random Q/K you see a legal causal pattern; after training on text, diagonals and phrase boundaries often brighten.',
+          'In early training on stories, local structure is common; later heads specialize (syntax, names, dialogue). Heatmaps are debugging tools—production stacks rarely visualize every head, but the skill transfers to interpreting attention rollout papers.',
         ],
       },
     ],
@@ -213,8 +262,8 @@ export const chapters: Chapter[] = [
     title: 'Transformer',
     subtitle: 'Residual, LayerNorm, GPT-2',
     syllabusTopic: 'transformer, residual, layernorm, GPT-2',
-    readingTime: '65–80 min',
-    premise: 'Stack blocks: attention → residual → LayerNorm → MLP → residual → LayerNorm. This is the GPT decoder stack you will train at toy scale in-browser.',
+    readingTime: '75–90 min',
+    premise: 'Stack blocks: attention → residual → LayerNorm → MLP → residual → LayerNorm. This is the GPT decoder stack—here you connect the pieces you have already coded (attention + MLP) to the full block diagram and modern variants.',
     labIds: ['attention', 'mlp'],
     tutorSeeds: ['Pre-norm vs post-norm?', 'Why residuals help optimization?'],
     parts: [
@@ -222,21 +271,40 @@ export const chapters: Chapter[] = [
         id: 'block',
         heading: 'A block is attention + MLP with residuals',
         paragraphs: [
-          'Residual paths preserve a gradient highway. LayerNorm stabilizes activations across depth. GPT-2 uses learned position embeddings and causal multi-head attention.',
+          'Residual paths preserve a gradient highway: output = x + SubLayer(x). If the sublayer learns something close to zero early, the block approximates identity and depth is easier to optimize. LayerNorm re-centers and scales activations per token before each sublayer (GPT-2 post-norm); many newer models use pre-norm (norm before attention/MLP) for training stability.',
+          'The MLP inside a block is usually two linear layers with expansion ratio 4× (n_embd → 4·n_embd → n_embd) and GELU in the middle—this is where most FLOPs live at wide widths.',
         ],
       },
       {
         id: 'gpt2-map',
         heading: 'Map syllabus to GPT-2 shapes',
         paragraphs: [
-          'n_layer, n_head, n_embd, context length T. Parameters live in token embeddings, position embeddings, per-block attention projections, MLP fc layers, and final lm_head tied to embeddings (weight tying).',
+          'Hyperparameters: n_layer, n_head, n_embd, context length T. Each block has Q,K,V,O projections (roughly 4·n_embd² params) plus MLP matrices (8·n_embd² with 4× expansion). Token + position embeddings add V·n_embd; lm_head often ties weights with token embeddings to save parameters.',
+          'Forward pass for decoding: embed tokens → for each block apply masked self-attention then MLP, with residuals and norms → final linear to logits → softmax/sample next token. Training uses teacher forcing (feed gold prefix) and predicts next token at every position in parallel within T.',
         ],
+        keyTerms: [
+          { term: 'weight tying', definition: 'Sharing input embedding and output projection weights to reduce params and regularize.' },
+          { term: 'teacher forcing', definition: 'Training with ground-truth prefix tokens instead of model-generated prefix.' },
+        ],
+      },
+      {
+        id: 'modern',
+        heading: 'What changed since GPT-2',
+        paragraphs: [
+          'GPT-2 (2019) is still the pedagogical spine: decoder-only, causal attention, learned positions, LayerNorm + GELU MLP. Llama-class models swap LayerNorm for RMSNorm, use RoPE instead of additive positions, often GQA (grouped query attention) for faster inference, and SwiGLU MLPs instead of GELU-MLP.',
+          'None of these change the autoregressive objective—they change stability, speed, and memory. When reading HF config.json for a modern checkpoint, map each field back to the block diagram you built here.',
+        ],
+        callout: {
+          tone: 'interview',
+          body: 'Be able to sketch one transformer block and name where GPT-2 vs Llama differ (norm, position, MLP activation, attention grouping).',
+        },
       },
       {
         id: 'toy-train',
         heading: 'Toy training expectations',
         paragraphs: [
-          'Full training in-tab is limited by CPU time; the course faithful path is to run few hundred steps on a micro corpus, inspect loss, then use search-assisted Storyteller for polished prose while you continue implementing inference optimizations.',
+          'Full transformer training in-tab is limited by CPU time and memory. The faithful path: implement forward for a few blocks on a micro batch, run hundreds of steps, watch loss, then use search-assisted Storyteller for polished prose while you study inference (KV-cache, quant) in later chapters.',
+          'If loss flatlines, check data size (chapter 11), learning rate (chapter 7), and whether your implementation applies the causal mask. Most student bugs are shape errors or masking mistakes, not missing secret tricks.',
         ],
       },
     ],
@@ -258,13 +326,21 @@ export const chapters: Chapter[] = [
         heading: 'Compress text into a vocabulary',
         paragraphs: [
           'TinyStories repeats words like "the", "and", "little". BPE starts with bytes or characters and iteratively merges the most common adjacent pair until vocab size K is reached.',
+          'Compression matters: fewer tokens per story means longer effective context and cheaper training. A 32k vocab might represent common English morphemes in one token while rare words decompose into pieces ("straw" + "berry").',
         ],
       },
       {
         id: 'train-merge',
         heading: 'Train merges on corpus statistics',
         paragraphs: [
-          'Count pairs in tokenized sequences, pick argmax, merge everywhere, repeat. Store merge rank order for deterministic encoding. The lab trains on your shard and reports compression ratio vs characters.',
+          'Count pairs in tokenized sequences, pick argmax, merge everywhere, repeat. Store merge rank order for deterministic encoding—the merge list is the tokenizer artifact you ship with the model.',
+          'The lab trains merges on your shard, then encodes and decodes a demo word. Production tokenizers also define special tokens (BOS, EOS, padding) and normalization (NFKC, whitespace) before BPE.',
+        ],
+        checkYourself: [
+          {
+            prompt: 'Why must encode and decode use the same merge order?',
+            reveal: 'Merges are greedy and order-dependent; changing order changes segment boundaries and token ids, breaking compatibility with trained embeddings.',
+          },
         ],
       },
       {
@@ -272,6 +348,7 @@ export const chapters: Chapter[] = [
         heading: 'Unicode & UTF-8 (appendix tie-in)',
         paragraphs: [
           'Byte-level BPE avoids unknown Unicode characters: every UTF-8 byte is in the base alphabet. This is how production tokenizers avoid brittle ASCII-only assumptions.',
+          'Emoji and accented characters become short byte sequences; the model never sees an "unknown" token if bytes are exhaustive. Tradeoff: sequences can be longer for non-Latin scripts unless merges capture frequent multibyte patterns.',
         ],
       },
     ],
@@ -292,22 +369,26 @@ export const chapters: Chapter[] = [
         id: 'init',
         heading: 'Initialization sets signal scale',
         paragraphs: [
-          'Too large → saturated activations; too small → vanishing signal. GPT-style init uses small normal weights scaled by depth and width.',
+          'Too large → saturated activations and exploding logits; too small → vanishing signal and slow learning. GPT-style init uses small normal weights, sometimes scaled by 1/√(fan-in) or divided by √(2·n_layer) for residuals.',
+          'Attention projection init especially affects early softmax entropy—if logits are huge, attention becomes one-hot and gradients vanish.',
         ],
       },
       {
         id: 'adamw',
         heading: 'AdamW adapts per-parameter steps',
         paragraphs: [
-          'Maintain first and second moment estimates of gradients; bias-correct; apply decoupled weight decay on weights only. The optimizer lab steps a 2D loss landscape so you see different trajectories vs SGD.',
+          'Adam tracks exponential moving averages of gradient (m) and squared gradient (v), then updates with bias-corrected estimates. AdamW decouples weight decay: shrink weights directly instead of mixing L2 into the gradient, which matters for transformers.',
+          'The optimizer lab walks a stiff 2D quadratic—large learning rate on the steep axis oscillates; Adam-like per-axis scaling can converge faster than vanilla SGD on ill-conditioned surfaces.',
         ],
       },
       {
         id: 'schedule',
         heading: 'Learning rate schedules',
         paragraphs: [
-          'Warmup stabilizes early attention; cosine decay improves late fine-tuning. Log lr vs step alongside loss in the UI.',
+          'Warmup ramps lr from near zero over the first few hundred or thousand steps so attention and layernorm statistics stabilize. Cosine decay (or linear) lowers lr late in training for fine detail in weights.',
+          'Gradient clipping (global norm cap) prevents rare bad batches from dominating when loss spikes—common in RL and sometimes in LM pretrain. Log lr vs step alongside loss when you train outside the browser.',
         ],
+        callout: { tone: 'tip', body: 'If loss NaNs, first divide lr by 10 and enable grad clip before rewriting the model.' },
       },
     ],
   },
@@ -327,21 +408,27 @@ export const chapters: Chapter[] = [
         id: 'cpu',
         heading: 'CPU baseline in Python',
         paragraphs: [
-          'Nested loops or typed arrays for matmul. Good for tiny shapes and debugging numerical issues.',
+          'Nested loops or typed arrays for matmul. Good for tiny shapes and debugging numerical issues. The device lab times a 64×64 multiply—at that size CPU often wins because GPU launch overhead dominates.',
         ],
+        callout: {
+          tone: 'note',
+          body: 'Sim vs reality: CUDA kernels on datacenter GPUs drive LLM training; this course measures intuition in Python/WebGPU, not TFLOPS leaderboard numbers.',
+        },
       },
       {
         id: 'webgpu',
         heading: 'WebGPU as browser GPU',
         paragraphs: [
-          'When `navigator.gpu` exists, dispatch compute shaders for matmul tiles. Fall back gracefully with a clear message—many learners are on laptops without WebGPU.',
+          'When `navigator.gpu` exists, dispatch compute shaders for matmul tiles. Fall back gracefully with a clear message—many learners are on laptops without WebGPU or with blocked adapters.',
+          'Think in terms of host-visible buffers, bind groups, and workgroup sizes—analogous to cudaMalloc, kernel launches, and thread blocks.',
         ],
       },
       {
         id: 'cuda-map',
         heading: 'Mental map to CUDA',
         paragraphs: [
-          'Kernels, grids, and memory hierarchies in CUDA correspond to WGSL compute pipelines and storage buffers. The concepts transfer even if syntax differs.',
+          'Kernels, grids, and memory hierarchies in CUDA correspond to WGSL compute pipelines and storage buffers. Shared memory tile optimizations in CUTLASS-style libraries are why large matmuls saturate GPUs; you will call those via frameworks long before writing your own.',
+          'Inference serving adds another layer: batching requests, KV-cache paging, and tensor parallel sharding across GPUs.',
         ],
       },
     ],
@@ -362,21 +449,24 @@ export const chapters: Chapter[] = [
         id: 'formats',
         heading: 'Floating point formats',
         paragraphs: [
-          'fp32 is the reference. fp16 has smaller mantissa; bf16 keeps exponent range; fp8 pushes further with block scaling in hardware trends.',
+          'fp32 is the reference for loss and master weights. fp16 halves memory bandwidth but risks underflow in tiny gradients; bf16 shares fp32 exponent width with a shorter mantissa—often the sweet spot on NVIDIA training chips.',
+          'fp8 (e4m3 / e5m2) appears in H100-class hardware with per-tensor or per-block scaling factors; treat it as an inference and training acceleration format, not a new algorithm.',
         ],
       },
       {
         id: 'mixed',
         heading: 'Mixed precision training pattern',
         paragraphs: [
-          'Forward/backward in lower precision where safe; master weights in fp32; loss scaling to avoid gradient underflow.',
+          'Forward/backward in lower precision where safe; master weights in fp32; loss scaling multiplies loss before backward then unscales grads to keep fp16 gradients representable.',
+          'Some layers (softmax, layernorm reductions) stay in fp32 even when matmuls are fp16/bf16 because numerical error accumulates across the vocab dimension.',
         ],
       },
       {
         id: 'browser',
         heading: 'What browsers can do today',
         paragraphs: [
-          'WebGPU shader types may expose f16 on supported devices. The lab demonstrates bitwise rounding effects on a vector so errors are visible without a datacenter GPU.',
+          'WebGPU shader types may expose f16 on supported devices. The precision lab demonstrates fp32 accumulation drift on many small adds—a different failure mode than low-precision matmul but equally real.',
+          'You will not train a 1B model in mixed precision in-tab; the goal is to recognize dtype arguments in PyTorch (`autocast`, `GradScaler`) when you move off-browser.',
         ],
       },
     ],
@@ -433,21 +523,30 @@ export const chapters: Chapter[] = [
         id: 'tinystories',
         heading: 'TinyStories in the browser',
         paragraphs: [
-          'Fetch bundled gzip shards from static hosting (no API server). Parse JSON lines, filter by length, hold out validation lines for perplexity estimates.',
+          'This app ships a plain-text TinyStories-style shard under `public/data/` (tens of thousands of characters) so labs can train and evaluate without a backend. Larger training pulls JSONL from Hugging Face with story text, metadata, and deduplication hashes.',
+          'Hold out 10–15% of stories (not random characters) for validation so perplexity reflects generalization to new plots, not just new positions in the same paragraph.',
         ],
       },
       {
         id: 'loader',
         heading: 'Batching variable-length stories',
         paragraphs: [
-          'Pad or pack sequences to context T. Attention masks prevent pad tokens from contributing. The loader lab shows token throughput per second in JS.',
+          'Pad or pack sequences to context T. Attention masks prevent pad tokens from contributing to attention or loss. Packing concatenates multiple short stories with boundary tokens to raise GPU utilization—standard in nanoGPT-style trainers.',
+          'The dataset lab prints basic corpus stats; the eval lab estimates bigram perplexity on a train/val split as a template for how you would score any LM.',
         ],
       },
       {
         id: 'synthetic',
         heading: 'Synthetic data generation',
         paragraphs: [
-          'Templates + word lists can augment rare patterns. Use search-engine assist to brainstorm story prompts, then train only on text you curate locally.',
+          'Templates + word lists can augment rare patterns (morals, settings, character names). Use search-engine assist to brainstorm story prompts, then train only on text you curate and license-check.',
+          'Synthetic data can inflate benchmarks if templates leak into eval—keep held-out human-written or separately generated stories for honest metrics.',
+        ],
+        checkYourself: [
+          {
+            prompt: 'Why split by story lines instead of shuffling all characters for validation?',
+            reveal: 'Character-level splits leak adjacent context across the boundary; story-level splits mimic deploying on unseen documents.',
+          },
         ],
       },
     ],
@@ -468,15 +567,21 @@ export const chapters: Chapter[] = [
         id: 'naive',
         heading: 'Naive vs cached decode',
         paragraphs: [
-          'Measure tokens/sec for both paths on the same tiny model. Cached should win as sequence length grows.',
+          'Naive autoregressive attention recomputes keys/values for every prior token on each new token—cost grows like O(T²) per layer. Caching stores K and V tensors after each step and only projects the new token’s q, k, v for the latest position.',
+          'The lab contrasts operation counts for recompute-all vs append-to-cache; wall-clock wins appear once T exceeds a modest threshold and implementations are fused.',
         ],
       },
       {
         id: 'memory',
         heading: 'Memory tradeoff',
         paragraphs: [
-          'Cache size scales O(layers · heads · dim · sequence). This is the serving cost behind long Storyteller sessions.',
+          'Cache size scales O(layers · heads · head_dim · sequence_length · bytes_per_element). Long chat histories and multi-turn Storyteller sessions are bounded by this footprint before they are bounded by FLOPs.',
+          'Serving systems use paging (vLLM-style), quantization of KV, or context truncation policies. Prefix caching reuses KV when system prompts repeat across users.',
         ],
+        callout: {
+          tone: 'interview',
+          body: 'Explain why decode batching is memory-bound for long contexts even when matmul FLOPs look small.',
+        },
       },
     ],
   },
@@ -496,14 +601,16 @@ export const chapters: Chapter[] = [
         id: 'linear',
         heading: 'Quantize linear layers',
         paragraphs: [
-          'Find max abs per row/column, scale to int8, store scale factors. Dequant on the fly during inference.',
+          'Affine quantization maps floating weights to int8 with scale s (and sometimes zero-point z): q = round(w / s). Per-channel scales track outliers better than one global scale for an entire layer.',
+          'The quant lab quantizes a tiny vector and reports max reconstruction error—real checkpoints use grouped int4 blocks (GPTQ/AWQ) with calibration data to pick scales.',
         ],
       },
       {
         id: 'quality',
         heading: 'Quality vs size',
         paragraphs: [
-          'Compare perplexity or side-by-side generation before/after quant in the lab.',
+          'Smaller dtypes shrink model bytes (fit in IndexedDB or mobile) and raise tokens/sec if hardware has int8 tensor cores. Quality loss shows up as higher perplexity or factual drift on niche domains.',
+          'Always compare before/after on the same eval set; generation samples alone are noisy. Quant-aware fine-tuning (QAT) can recover accuracy at the cost of another training pass.',
         ],
       },
     ],
@@ -524,14 +631,16 @@ export const chapters: Chapter[] = [
         id: 'chat-format',
         heading: 'Chat templates',
         paragraphs: [
-          'Structure user/assistant turns with special tokens. SFT maximizes likelihood of assistant tokens only.',
+          'Structure user/assistant turns with special tokens (`<|user|>`, `<|assistant|>`, or model-specific headers). SFT maximizes likelihood of assistant tokens only—mask loss on user/system tokens so the model learns to respond, not imitate prompts.',
+          'The SFT template lab is format-only: it prints a chat-shaped string you can critique via search assist. Real SFT datasets are thousands of (prompt, response) pairs with consistent templating.',
         ],
       },
       {
         id: 'lora',
         heading: 'LoRA intuition',
         paragraphs: [
-          'Freeze base weights W; learn A·B with small rank r. Forward uses W + AB. Far fewer trainable parameters for demo fine-tunes.',
+          'Freeze base weights W; learn low-rank adapters A∈ℝ^{r×n}, B∈ℝ^{m×r} so ΔW = B·A. Forward uses W + ΔW (often scaled by α/r). Trainable params drop from m·n to r·(m+n), which is why consumer GPUs can fine-tune 7B models.',
+          'Targets are usually attention projections (q,k,v,o) and sometimes MLP layers—not every matrix needs an adapter. The LoRA lab counts params on toy shapes and applies ΔW to a vector.',
         ],
         callout: {
           tone: 'note',
@@ -563,14 +672,26 @@ export const chapters: Chapter[] = [
         id: 'rlhf',
         heading: 'RLHF stack',
         paragraphs: [
-          'SFT model → reward model on human rankings → policy optimization (PPO) to raise reward without drifting from language.',
+          'RLHF pipeline: (1) SFT model, (2) train a reward model on human rankings of completions, (3) optimize the policy with PPO (or similar) to increase reward while a KL penalty keeps outputs close to the SFT model.',
+          'PPO is sample-expensive and finicky—production teams increasingly use offline preference losses. This course does not run PPO in-browser; understand the vocabulary to read papers and TRL docs.',
         ],
+        callout: {
+          tone: 'note',
+          body: 'Sim vs reality: preference data is costly; alignment failures (sycophancy, refusal overreach) often trace to reward misspecification, not missing one more epoch.',
+        },
       },
       {
         id: 'dpo',
         heading: 'DPO as direct preference optimization',
         paragraphs: [
-          'Compare chosen vs rejected continuations with a classification-style loss on the policy; avoids explicit reward model training in some setups.',
+          'DPO reparameterizes the RL objective so you can train on (prompt, chosen, rejected) triples with a classification-style loss on log-prob ratios—no explicit reward model rollout loop in the inner training step.',
+          'The DPO lab exports a single preference pair as text/JSON for discussion; real runs need diverse pairs covering safety, tone, and factuality for your Storyteller persona.',
+        ],
+        checkYourself: [
+          {
+            prompt: 'What does the KL term in RLHF protect against?',
+            reveal: 'It penalizes drifting far from the reference (SFT) policy so optimization for reward does not collapse into high-scoring gibberish.',
+          },
         ],
       },
       {
@@ -578,6 +699,7 @@ export const chapters: Chapter[] = [
         heading: 'Preference UI in Storyteller',
         paragraphs: [
           'Pick which story continuation you prefer; export pairs as JSON for offline training scripts or discuss improvements via search-engine tutoring.',
+          'Design evals the same way: show two continuations to testers, aggregate win-rate, and only ship style changes that improve preferences without raising hallucination rate on factual prompts.',
         ],
       },
     ],
@@ -598,21 +720,24 @@ export const chapters: Chapter[] = [
         id: 'static',
         heading: 'Static deployment',
         paragraphs: [
-          'Build with Vite, publish to GitHub Pages. No server secrets, no API keys in the repo. AI features open user-chosen search tabs.',
+          'Build with Vite, publish to GitHub Pages (or any static host). No server secrets, no API keys in the repo. CI runs typecheck, tests, and `vite build`; AI features open user-chosen search tabs instead of proxying inference.',
+          'HashRouter keeps deep links working on GitHub Pages where the server always serves `index.html` for unknown paths.',
         ],
       },
       {
         id: 'api-shape',
         heading: 'API shape (conceptual)',
         paragraphs: [
-          'Map Storyteller messages to {model, messages, temperature}. Compare to OpenAI chat schema so learners recognize industry APIs—even though this app does not host one.',
+          'Map Storyteller messages to `{ model, messages: [{role, content}], temperature, max_tokens }`. Streaming uses SSE chunks with delta content fields—compare to OpenAI-compatible servers (vLLM, llama.cpp server) even though this app does not host one.',
+          'If you later wrap a local model, the Storyteller UI becomes a thin client; the hard parts remain tokenizer, sampling, and KV-cache serving.',
         ],
       },
       {
         id: 'storage',
         heading: 'Client storage',
         paragraphs: [
-          'IndexedDB for checkpoints, tokenizer merges, and chat history. Offer download/upload JSON for portability.',
+          'IndexedDB can store checkpoints, tokenizer merges, and chat history in the browser. This course exports chapter progress as JSON today; model checkpoints would follow the same pattern (download/upload) for portability.',
+          'Version your artifacts: include vocab size, merge list hash, and model config next to weights so you do not load incompatible tensors.',
         ],
       },
     ],
@@ -633,21 +758,24 @@ export const chapters: Chapter[] = [
         id: 'vq',
         heading: 'VQ-VAE intuition',
         paragraphs: [
-          'Encode image patches to discrete codes; decode back. Autoregressive models can predict codes for illustrations conditioned on story text.',
+          'VQ-VAE encodes image patches into discrete codebook indices; a decoder reconstructs pixels from codes. Autoregressive text models can predict image token sequences conditioned on story embeddings—DALL·E / early multimodal LMs used variants of this idea.',
+          'Codebook collapse (unused entries) and blur are classic training issues; diffusion models partly sidestep discrete codes for photorealism at the cost of slower sampling.',
         ],
       },
       {
         id: 'diffusion',
         heading: 'Diffusion transformer (DiT)',
         paragraphs: [
-          'Iterative denoising in latent space; transformer blocks replace U-Net at scale. Browser demos stay 2D grid toy size.',
+          'Diffusion trains a network to predict noise ε given noisy latents and timestep t. Sampling starts from Gaussian noise and iteratively denoises. DiT replaces U-Net backbones with transformer blocks operating on latent patches.',
+          'Text conditioning injects via cross-attention or adaLN from a text encoder (CLIP/T5). Browser-scale demos stay on tiny grids; production runs billions of params on GPU clusters.',
         ],
       },
       {
         id: 'illustrate',
         heading: 'Illustrate via search workflow',
         paragraphs: [
-          'Build a multimodal prompt from story text; open image-capable search providers for the user. Local procedural SVG placeholders show layout without hosting image models.',
+          'Build a multimodal prompt from story text (characters, setting, art style); open image-capable search providers for the user. The multimodal lab prints a structured illustration prompt aligned with TinyStories tone.',
+          'For a Storyteller product, illustration is optional media—keep text generation authoritative and treat images as suggestions that may need human review for child safety.',
         ],
       },
     ],
@@ -658,57 +786,62 @@ export const appendixTopics: AppendixTopic[] = [
   {
     id: 'langs',
     title: 'Programming languages: Assembly, C, Python',
-    summary: 'LLM101n names three implementation layers; this browser course uses Pyodide (Python) for labs, TypeScript for the SPA shell, and optional WASM C.',
+    summary:
+      'Karpathy’s syllabus names three implementation layers. This browser port runs pedagogy in Python (Pyodide), ships the UI in TypeScript, and leaves room for WASM/C kernels where Python is too slow.',
     bullets: [
-      'Python chapters map to Pyodide labs and exported .py snippets.',
-      'C hot paths can ship as WASM modules for matmul kernels (advanced optional track).',
-      'Assembly is conceptual—inspect WASM disassembly when curious.',
+      'Python: all editable labs—bigram through LoRA—share the same Pyodide runner; export snippets to a local venv when you outgrow the browser.',
+      'C / Rust: production inference kernels (flash-attn, fused layernorm) live here; WASM can accelerate matmul in chapter 8 as an optional fork.',
+      'Assembly: useful mental model for SIMD and memory bandwidth limits; inspect WASM disassembly if you want to see what the CPU actually executes.',
     ],
   },
   {
     id: 'data-types',
     title: 'Integers, floats, strings, UTF-8',
-    summary: 'Tokenizers and quantizers depend on bitwise exactness.',
+    summary: 'Tokenizers, quantizers, and distributed collectives all assume you know how bits represent numbers and text.',
     bullets: [
-      'See chapter 6 for UTF-8 byte-level BPE.',
-      'Chapter 9 for float formats; chapter 13 for int8 storage.',
+      'UTF-8: variable-length bytes; byte-level BPE never sees “unknown char” if the alphabet is 256 bytes (chapter 6).',
+      'fp32 vs bf16 vs int8: exponent width, rounding, and accumulation order change loss curves (chapters 9 and 13).',
+      'Strings in Python 3 are Unicode code points; on disk stories are UTF-8 bytes—encode/decode consciously when hashing datasets.',
     ],
   },
   {
     id: 'tensors',
     title: 'Tensor views, strides, contiguous memory',
-    summary: 'Attention and batched matmul require shape reasoning.',
+    summary: 'Attention, batched matmul, and KV-cache updates are shape and stride problems disguised as architecture.',
     bullets: [
-      'Every lab logs tensor shapes in the UI.',
-      'KV-cache append is a stride / offset exercise in chapter 12.',
+      'A tensor shape `[batch, heads, seq, dim]` tells you which axis to softmax over; draw it before coding.',
+      'KV-cache append is “write new K/V at offset seq_len-1” per layer—strides decide whether copies are needed.',
+      'Contiguous vs strided views explain when `.contiguous()` appears in PyTorch stack traces.',
     ],
   },
   {
     id: 'frameworks',
     title: 'PyTorch, JAX',
-    summary: 'Production stacks use frameworks; this course implements core ops to understand what frameworks automate.',
+    summary: 'Frameworks record autograd graphs, fuse kernels, and ship distributed primitives—you implement the math once here, then delegate.',
     bullets: [
-      'After each lab, a sidebar lists the PyTorch one-liner equivalent.',
-      'JAX mentioned for pmap vs our Worker simulation in chapter 10.',
+      'PyTorch: `nn.Linear`, `F.scaled_dot_product_attention`, `AdamW`, `torch.compile`—map each chapter lab to one API call after you understand the forward pass.',
+      'JAX: functional style + `pmap`/`shard_map` for SPMD; compare to our Worker all-reduce toy in chapter 10.',
+      'Hugging Face Transformers: config.json + `AutoModelForCausalLM`—use after you can explain one block by hand.',
     ],
   },
   {
     id: 'architectures',
     title: 'GPT, Llama, MoE',
-    summary: 'GPT-2 is the spine; appendix cards contrast Llama (RoPE, RMSNorm, GQA) and MoE routing.',
+    summary: 'GPT-2 is the teaching skeleton; modern checkpoints remix norms, positions, MLPs, and attention grouping.',
     bullets: [
-      'RoPE: relative positions via rotated embeddings.',
-      'GQA: grouped query heads for faster inference.',
-      'MoE: sparse FFN experts—memory vs quality tradeoff.',
+      'GPT-2: learned absolute positions, LayerNorm, GELU MLP, dense multi-head attention.',
+      'Llama: RMSNorm, RoPE, SwiGLU MLP, often GQA—fewer KV heads, same query count.',
+      'MoE: multiple FFN experts per layer + router; activates top-k experts per token—great quality/$, tricky to serve.',
     ],
   },
   {
     id: 'multimodal-extra',
     title: 'Images, audio, video',
-    summary: 'Chapter 17 introduces illustration; audio/video noted for future extension.',
+    summary: 'Chapter 17 covers illustration prompts; speech and video are adjacent product surfaces with their own tokenizers and latency budgets.',
     bullets: [
-      'Whisper-style speech is out of scope for v1 static hosting.',
-      'Link external resources via search assist when exploring.',
+      'Speech: encoder-decoder (Whisper) or speech-to-semantic-token pipelines—real-time needs streaming inference.',
+      'Video: spatiotemporal patches + huge context; mostly research/product labs outside this static course.',
+      'Use search assist to explore papers; keep child-safety review human-in-the-loop for any generated media.',
     ],
   },
 ]
