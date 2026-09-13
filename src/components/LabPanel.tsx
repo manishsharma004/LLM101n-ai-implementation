@@ -3,7 +3,8 @@ import type { LabId } from '../content/types'
 import { trainBigram, sampleBigram } from '../labs/bigram'
 import { trainBpe } from '../labs/bpe'
 import { causalAttention, randomMatrix } from '../labs/attention'
-import { Value, zeroGrad } from '../labs/micrograd'
+import { MICROGRAD_STARTER_PYTHON } from '../labs/microgradStarterPython'
+import { PyodideCodeLab } from './PyodideCodeLab'
 
 const SAMPLE_URL = './data/tinystories-sample.txt'
 
@@ -82,33 +83,12 @@ function BigramLab() {
 }
 
 function MicrogradLab() {
-  const [log, setLog] = useState('')
-
-  function run() {
-    const x = new Value(2)
-    const w1 = new Value(-3)
-    const w2 = new Value(1)
-    const b = new Value(6)
-    const lines: string[] = []
-    for (let step = 0; step < 30; step++) {
-      const n = x.mul(w1).add(b).mul(w2)
-      const loss = n.sub(new Value(1)).pow(2)
-      zeroGrad(x, w1, w2, b)
-      loss.backward()
-      w1.data -= 0.05 * w1.grad
-      w2.data -= 0.05 * w2.grad
-      b.data -= 0.05 * b.grad
-      if (step % 5 === 0) lines.push(`step ${step} loss=${loss.data.toFixed(4)} w1=${w1.data.toFixed(3)}`)
-    }
-    setLog(lines.join('\n'))
-  }
-
   return (
-    <section className="panel lab">
-      <h3>Lab: Micrograd scalar descent</h3>
-      <button type="button" onClick={run}>Run 30 steps</button>
-      <pre className="output">{log}</pre>
-    </section>
+    <PyodideCodeLab
+      title="Lab: Micrograd (Python in Pyodide)"
+      description="Real micrograd-style autograd and SGD — same ideas as Karpathy’s course, executed in CPython via WebAssembly."
+      starterCode={MICROGRAD_STARTER_PYTHON}
+    />
   )
 }
 

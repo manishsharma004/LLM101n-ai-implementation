@@ -4,4 +4,10 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [react()],
   base: './',
+  optimizeDeps: {
+    exclude: ['pyodide'],
+  },
+  worker: {
+    format: 'es',
+  },
 })
