@@ -8,7 +8,7 @@
     "quality_profile": "standard",
     "repository": {
       "url": "https://github.com/manishsharma004/LLM101n-ai-implementation",
-      "revision": "de9754cc9cb4cc812b80c8f457b793d4df930d65"
+      "revision": "7da5ced37c3ec1b4576ed7c32b9801c8be34a617"
     },
     "views": [
       {
@@ -345,7 +345,10 @@
       "from": "chapter-ui",
       "to": "browser-labs",
       "label": "in-tab demos",
-      "labelAt": [795, 268]
+      "labelAt": [
+        795,
+        268
+      ]
     },
     {
       "id": "chapter-data",
