@@ -1,0 +1,10 @@
+{
+  "install": "npm install",
+  "start": "npm run dev",
+  "terminals": [
+    {
+      "name": "llm101n",
+      "command": "npm run dev"
+    }
+  ]
+}
