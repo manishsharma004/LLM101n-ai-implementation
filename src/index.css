@@ -65,6 +65,10 @@ a {
   max-width: 52rem;
 }
 
+.main:has(.chapter-layout) {
+  max-width: min(92rem, calc(100vw - 17rem));
+}
+
 .page h1 {
   margin-top: 0;
 }
@@ -348,6 +352,243 @@ button.primary {
 
 .diagram-error {
   color: #f87171;
+}
+
+.chapter-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 2rem;
+  align-items: start;
+}
+
+.chapter-main {
+  min-width: 0;
+}
+
+.chapter-rail {
+  display: none;
+}
+
+.chapter-inline-tools {
+  display: block;
+}
+
+.scroll-target {
+  scroll-margin-top: 1rem;
+}
+
+@media (min-width: 1120px) {
+  .chapter-layout {
+    grid-template-columns: minmax(0, 42rem) minmax(300px, 22rem);
+  }
+
+  .chapter-rail {
+    display: block;
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    padding: 0.75rem 1rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+
+  .chapter-inline-tools {
+    display: none;
+  }
+
+  .rail-title {
+    margin: 0 0 0.5rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+
+  .rail-subtitle {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .rail-toc ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+  }
+
+  .rail-toc button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--muted);
+    padding: 0.35rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    line-height: 1.35;
+  }
+
+  .rail-toc button:hover,
+  .rail-toc button.active {
+    color: var(--text);
+    background: rgba(110, 231, 183, 0.12);
+  }
+
+  .rail-toc button.active {
+    border-left: 2px solid var(--accent);
+  }
+
+  .rail-block {
+    margin-bottom: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .rail-block.rail-search .panel {
+    margin: 0;
+    padding: 0.75rem 0 0;
+    background: transparent;
+    border: none;
+  }
+
+  .rail-block.rail-search h3 {
+    font-size: 1rem;
+    margin-top: 0;
+  }
+
+  .rail-block.rail-search .muted {
+    font-size: 0.8rem;
+  }
+
+  .rail-block.rail-search textarea {
+    min-height: 4.5rem;
+    font-size: 0.85rem;
+  }
+
+  .chip-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .chip {
+    background: #0c1016;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 0.4rem 0.55rem;
+    font-size: 0.78rem;
+    text-align: left;
+    line-height: 1.35;
+  }
+
+  .chip:hover,
+  .chip.active {
+    border-color: var(--accent);
+  }
+
+  .rail-hint {
+    font-size: 0.75rem;
+    margin: 0.5rem 0 0;
+  }
+
+  .rail-slider {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+  }
+
+  .rail-slider input[type='range'] {
+    width: 100%;
+  }
+
+  .mini-bars {
+    margin-top: 0.5rem;
+  }
+
+  .mini-bar-row {
+    display: grid;
+    grid-template-columns: 1.25rem 1fr 2.5rem;
+    gap: 0.35rem;
+    align-items: center;
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .mini-bar-track {
+    height: 6px;
+    background: #0c1016;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .mini-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+  }
+
+  .mini-bar-val {
+    text-align: right;
+    color: var(--muted);
+  }
+
+  .bit-row {
+    display: flex;
+    gap: 4px;
+    margin-top: 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .bit {
+    padding: 0.35rem 0.25rem;
+    border-radius: 4px;
+    text-align: center;
+    flex: 1;
+  }
+
+  .bit.sign {
+    background: #3b4252;
+  }
+
+  .bit.exp {
+    background: #4c6ef5;
+  }
+
+  .bit.mant {
+    background: #2b8a3e;
+  }
+
+  .rail-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .mask-grid {
+    display: grid;
+    gap: 3px;
+    width: 100%;
+    max-width: 140px;
+  }
+
+  .mask-on {
+    aspect-ratio: 1;
+    background: rgba(110, 231, 183, 0.75);
+    border-radius: 2px;
+  }
+
+  .mask-off {
+    aspect-ratio: 1;
+    background: #1a2332;
+    border-radius: 2px;
+  }
 }
 
 .progress-panel textarea {
