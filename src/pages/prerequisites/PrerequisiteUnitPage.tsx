@@ -1,0 +1,112 @@
+import { useEffect, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import { LabPanel } from '../../components/LabPanel'
+import { TopUtilityBar } from '../../components/layout/TopUtilityBar'
+import { getPrereqUnitBySlug, prerequisiteUnits } from '../../content/prerequisites/units'
+import { touchStudyStreak } from '../../lib/courseStats'
+import {
+  isPrereqUnitComplete,
+  setPrereqUnitComplete,
+} from '../../lib/prerequisiteProgress'
+
+export function PrerequisiteUnitPage() {
+  const { slug } = useParams()
+  const unit = slug ? getPrereqUnitBySlug(slug) : undefined
+  const [done, setDone] = useState(() => (unit ? isPrereqUnitComplete(unit.id) : false))
+
+  useEffect(() => {
+    if (unit) touchStudyStreak()
+  }, [unit?.id])
+
+  useEffect(() => {
+    if (unit) setDone(isPrereqUnitComplete(unit.id))
+  }, [unit?.id])
+
+  if (!unit) {
+    return (
+      <div className="page">
+        <p>Prerequisite unit not found.</p>
+        <Link to="/prerequisites">Back to prerequisites</Link>
+      </div>
+    )
+  }
+
+  const idx = prerequisiteUnits.findIndex((u) => u.id === unit.id)
+  const prev = idx > 0 ? prerequisiteUnits[idx - 1] : undefined
+  const next = idx < prerequisiteUnits.length - 1 ? prerequisiteUnits[idx + 1] : undefined
+
+  function toggleComplete() {
+    const next = !done
+    setPrereqUnitComplete(unit!.id, next)
+    setDone(next)
+  }
+
+  return (
+    <div className="workspace-page prereq-unit-page">
+      <TopUtilityBar
+        crumbs={[
+          { label: 'Home', to: '/' },
+          { label: 'Prerequisites', to: '/prerequisites' },
+          { label: `Unit ${unit.unitLabel}` },
+        ]}
+        chapterTitle={`Unit ${unit.unitLabel}: ${unit.shortTitle}`}
+      />
+
+      <header className="prereq-unit-header">
+        <Link to="/prerequisites" className="back-to-course">← Back to prerequisites path</Link>
+        <p className="eyebrow">Unit {unit.unitLabel} · {unit.estimatedHours}</p>
+        <h1>{unit.title}</h1>
+        <p className="subtitle">{unit.coreGoal}</p>
+        {unit.relatedChapterSlug ? (
+          <p className="muted">
+            Main course chapter:{' '}
+            <Link to={`/chapter/${unit.relatedChapterSlug}`}>Open full chapter</Link>
+          </p>
+        ) : null}
+      </header>
+
+      <div className="chapter-split prereq-split">
+        <article className="chapter-split-theory panel-surface">
+          {unit.sections.map((section) => (
+            <section key={section.id} className="part">
+              <h2>{section.heading}</h2>
+              {section.paragraphs?.map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+              <ul>
+                {section.bullets.map((b) => (
+                  <li key={b}>{b}</li>
+                ))}
+              </ul>
+            </section>
+          ))}
+
+          <label className="prereq-complete-check">
+            <input type="checkbox" checked={done} onChange={toggleComplete} />
+            Mark unit {unit.unitLabel} complete
+          </label>
+
+          <nav className="chapter-nav">
+            {prev ? (
+              <Link to={`/prerequisites/${prev.slug}`}>← Unit {prev.unitLabel}</Link>
+            ) : (
+              <Link to="/prerequisites">Prerequisites hub</Link>
+            )}
+            {next ? (
+              <Link to={`/prerequisites/${next.slug}`}>Unit {next.unitLabel} →</Link>
+            ) : (
+              <Link to="/">Enter main course →</Link>
+            )}
+          </nav>
+        </article>
+
+        {unit.labId ? (
+          <aside className="chapter-split-lab panel-surface">
+            <h2>Interactive code</h2>
+            <LabPanel labIds={[unit.labId]} variant="ide" />
+          </aside>
+        ) : null}
+      </div>
+    </div>
+  )
+}
