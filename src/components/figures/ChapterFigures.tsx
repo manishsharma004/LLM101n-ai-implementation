@@ -3,10 +3,22 @@ import { BarChartBlock, HeatmapBlock, LineChartBlock } from './ChartBlocks'
 import { MathBlock } from './MathBlock'
 import { MermaidBlock } from './MermaidBlock'
 
-export function ChapterFigures({ figures }: { figures: ChapterFigure[] }) {
+export function ChapterFigures({
+  figures,
+  hideAdvancedMath = false,
+}: {
+  figures: ChapterFigure[]
+  hideAdvancedMath?: boolean
+}) {
+  const visible = hideAdvancedMath ? figures.filter((f) => f.type !== 'math') : figures
+  if (!visible.length) {
+    return hideAdvancedMath ? (
+      <p className="muted beginner-math-hint">Turn off Beginner mode in the top bar to show full derivations.</p>
+    ) : null
+  }
   return (
     <div className="chapter-figures">
-      {figures.map((f, i) => {
+      {visible.map((f, i) => {
         switch (f.type) {
           case 'math':
             return <MathBlock key={i} figure={f} />

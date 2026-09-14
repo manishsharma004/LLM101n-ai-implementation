@@ -13,6 +13,7 @@ type Props = {
   runLabel?: string
   hint?: string
   editorMinLines?: number
+  variant?: 'default' | 'ide'
 }
 
 export function PyodideCodeLab({
@@ -22,6 +23,7 @@ export function PyodideCodeLab({
   runLabel = 'Run code',
   hint = 'Edit the Python below, then run.',
   editorMinLines = 14,
+  variant = 'default',
 }: Props) {
   const { pyodide, phase, message, error, retry } = usePyodide()
   const [code, setCode] = useState(starterCode)
@@ -68,25 +70,34 @@ export function PyodideCodeLab({
     setOutput('')
   }
 
+  const ide = variant === 'ide'
+
   return (
-    <section className="panel lab py-lab">
-      <h3>{title}</h3>
-      {description ? <p className="muted">{description}</p> : null}
-      <RuntimeBanner phase={phase} message={message} error={error} onRetry={retry} />
-      <p className="lab-hint">{hint}</p>
-      <MonacoEditor value={code} onChange={setCode} language="python" minLines={editorMinLines} ariaLabel="Python lab code" />
-      <div className="lab-actions">
-        <button type="button" className="primary" disabled={!ready || running} onClick={run}>
-          {running ? 'Running…' : ready ? runLabel : 'Loading Python…'}
-        </button>
-        <button type="button" disabled={running} onClick={reset}>Reset starter code</button>
+    <section className={`panel lab py-lab ${ide ? 'py-lab--ide' : ''}`}>
+      <div className="lab-header-row">
+        <h3>{ide ? 'Pyodide editor' : title}</h3>
+        {running ? <span className="lab-status running">Running…</span> : ready ? <span className="lab-status ready">Ready</span> : null}
       </div>
-      {output ? (
-        <div className="output-block">
-          <div className="output-label">Output</div>
-          <pre className="output">{output}</pre>
-        </div>
-      ) : null}
+      {!ide && description ? <p className="muted">{description}</p> : null}
+      <RuntimeBanner phase={phase} message={message} error={error} onRetry={retry} />
+      {!ide ? <p className="lab-hint">{hint}</p> : null}
+      <MonacoEditor
+        value={code}
+        onChange={setCode}
+        language="python"
+        minLines={ide ? Math.max(editorMinLines, 18) : editorMinLines}
+        ariaLabel="Python lab code"
+      />
+      <div className="lab-actions">
+        <button type="button" className="primary btn-run-code" disabled={!ready || running} onClick={run}>
+          {running ? 'Running…' : ready ? (ide ? 'Run code' : runLabel) : 'Loading Python…'}
+        </button>
+        <button type="button" disabled={running} onClick={reset}>Reset</button>
+      </div>
+      <div className="output-block lab-console">
+        <div className="output-label">Execution console</div>
+        <pre className="output">{output || (ready ? '[Pyodide] Edit code and press Run code.' : '[Pyodide] Loading runtime…')}</pre>
+      </div>
     </section>
   )
 }

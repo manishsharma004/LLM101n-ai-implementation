@@ -1,11 +1,19 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { chapters } from '../content/chapters'
+import {
+  chaptersInPhase,
+  curriculumPhases,
+  difficultyForChapter,
+} from '../content/curriculumPhases'
 import { ProgressPanel } from '../components/ProgressPanel'
 import { StorytellerPanel } from '../components/StorytellerPanel'
+import { TopUtilityBar } from '../components/layout/TopUtilityBar'
 import { isChapterComplete } from '../lib/progress'
 
-const GUIDED_FIRST = [1, 2, 3, 4, 5, 6]
+function moduleStatus(chapterId: string): 'done' | 'progress' | 'todo' {
+  if (isChapterComplete(chapterId)) return 'done'
+  return 'todo'
+}
 
 export function HomePage() {
   const [, tick] = useState(0)
@@ -16,70 +24,73 @@ export function HomePage() {
   }, [])
 
   return (
-    <div className="page home">
-      <header className="hero">
-        <h1>LLM101n: Let&apos;s build a Storyteller</h1>
-        <p>
-          Browser-only implementation of the{' '}
-          <a href="https://github.com/karpathy/LLM101n" target="_blank" rel="noreferrer">
-            karpathy/LLM101n
-          </a>{' '}
-          syllabus. Train intuition with in-tab labs; use search engines (Google, Duck.ai, Perplexity) for
-          AI-assisted story writing—no backend, no API keys in this app.
+    <div className="workspace-page dashboard-page">
+      <TopUtilityBar crumbs={[{ label: 'Home', to: '/' }, { label: 'Course modules' }]} />
+      <header className="dashboard-hero">
+        <h1>LLM101n: Build a Multimodal Storyteller</h1>
+        <p className="subtitle">
+          Track progress across 17 chapters in four phases. Each module includes theory, diagrams, and Pyodide labs.
         </p>
       </header>
 
       <StorytellerPanel />
 
-      <section className="guided-path">
-        <h2>Start here (self-learners)</h2>
-        <p className="muted">
-          Follow the full{' '}
-          <Link to="/learning-plan">six-phase learning plan</Link> (11 Karpathy resources + browser labs). Quick path:
-          chapters 01→06 before transformers and finetuning.
+      <div className="phase-roadmap">
+        {curriculumPhases.map((phase, idx) => (
+          <section key={phase.id} className={`phase-column phase-theme-${phase.theme}`}>
+            {idx > 0 ? <span className="phase-connector" aria-hidden /> : null}
+            <header className="phase-column-head">
+              <span className="phase-badge">Phase {phase.number}</span>
+              <h2>{phase.title}</h2>
+              <p className="muted">{phase.subtitle}</p>
+            </header>
+            <ul className="module-cards">
+              {chaptersInPhase(phase.id).map((ch) => {
+                const status = moduleStatus(ch.id)
+                return (
+                  <li key={ch.id}>
+                    <article className={`module-card status-${status}`}>
+                      <div className="module-card-top">
+                        <span className={`status-tag ${status}`}>
+                          {status === 'done' ? 'Completed' : status === 'progress' ? 'In progress' : 'Not started'}
+                        </span>
+                        <span className="difficulty-tag">{difficultyForChapter(ch)}</span>
+                      </div>
+                      <h3>
+                        <span className="module-num">Ch{String(ch.number).padStart(2, '0')}</span>
+                        {ch.title}
+                      </h3>
+                      <p className="muted module-meta">{ch.readingTime} read</p>
+                      <p className="module-blurb">{ch.subtitle}</p>
+                      <div className="module-actions">
+                        <Link to={`/chapter/${ch.slug}`} className="primary module-cta">
+                          {status === 'done' ? 'Review' : 'Start lab'}
+                        </Link>
+                        <Link to={`/chapter/${ch.slug}/focus`} className="btn-text">
+                          IDE
+                        </Link>
+                      </div>
+                    </article>
+                  </li>
+                )
+              })}
+            </ul>
+          </section>
+        ))}
+      </div>
+
+      <section className="dashboard-secondary">
+        <ProgressPanel />
+        <p className="muted dashboard-links">
+          <Link to="/learning-plan">Six-phase Karpathy learning plan</Link>
+          {' · '}
+          <Link to="/appendix">Appendix resources</Link>
+          {' · '}
+          <a href="./architecture/llm101n-runtime.architecture.html" target="_blank" rel="noreferrer">
+            Runtime architecture
+          </a>
         </p>
-        <ol className="syllabus guided">
-          {chapters
-            .filter((ch) => GUIDED_FIRST.includes(ch.number))
-            .map((ch) => (
-              <li key={ch.id}>
-                <Link to={`/chapter/${ch.slug}`}>
-                  <span className="ch-num">{String(ch.number).padStart(2, '0')}</span>
-                  <span className="ch-title">{ch.title}</span>
-                </Link>
-              </li>
-            ))}
-        </ol>
       </section>
-
-      <ProgressPanel />
-
-      <section>
-        <h2>Full syllabus</h2>
-        <ol className="syllabus">
-          {chapters.map((ch) => (
-            <li key={ch.id} className={isChapterComplete(ch.id) ? 'done' : undefined}>
-              <Link to={`/chapter/${ch.slug}`}>
-                <span className="ch-num">{String(ch.number).padStart(2, '0')}</span>
-                <span className="ch-title">{ch.title}</span>
-                <span className="ch-topic">{ch.syllabusTopic}</span>
-                {isChapterComplete(ch.id) ? <span className="ch-done" aria-label="Completed">✓</span> : null}
-              </Link>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <p>
-        <Link to="/appendix">Appendix topics</Link> ·{' '}
-        <a href="https://huggingface.co/datasets/roneneldan/TinyStories" target="_blank" rel="noreferrer">
-          TinyStories dataset
-        </a>{' '}
-        ·{' '}
-        <a href="./architecture/llm101n-runtime.architecture.html" target="_blank" rel="noreferrer">
-          Runtime architecture (Archify)
-        </a>
-      </p>
     </div>
   )
 }

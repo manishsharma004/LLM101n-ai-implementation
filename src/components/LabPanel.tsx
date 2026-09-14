@@ -124,10 +124,19 @@ const PY_LAB: Partial<
   },
 }
 
-export function LabPanel({ labIds }: { labIds: LabId[] }) {
+export function LabPanel({
+  labIds,
+  variant = 'default',
+  primaryOnly = false,
+}: {
+  labIds: LabId[]
+  variant?: 'default' | 'ide'
+  primaryOnly?: boolean
+}) {
+  const ids = primaryOnly ? labIds.filter((id) => id !== 'storyteller').slice(0, 1) : labIds.filter((id) => id !== 'storyteller')
   return (
     <div className="labs">
-      {labIds.map((id) => {
+      {ids.map((id) => {
         const spec = PY_LAB[id]
         if (!spec) return null
         return (
@@ -138,9 +147,14 @@ export function LabPanel({ labIds }: { labIds: LabId[] }) {
             starterCode={spec.code}
             runLabel={spec.runLabel}
             editorMinLines={spec.minLines}
+            variant={variant}
           />
         )
       })}
     </div>
   )
+}
+
+export function getPrimaryLabId(labIds: LabId[]): LabId | undefined {
+  return labIds.find((id) => id !== 'storyteller' && PY_LAB[id])
 }

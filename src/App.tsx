@@ -1,38 +1,23 @@
-import { HashRouter, Link, Route, Routes } from 'react-router-dom'
-import { chapters } from './content/chapters'
+import { HashRouter, Route, Routes } from 'react-router-dom'
+import { AppShell } from './components/layout/AppShell'
 import { AppendixPage, ChapterPage } from './pages/ChapterPage'
 import { HomePage } from './pages/HomePage'
+import { LabFocusPage } from './pages/LabFocusPage'
 import { LearningPlanPage } from './pages/LearningPlanPage'
 import './index.css'
 
 export function App() {
   return (
     <HashRouter>
-      <div className="app-shell">
-        <aside className="sidebar">
-          <div className="brand">
-            <Link to="/">LLM101n</Link>
-          </div>
-          <nav className="sidebar-nav">
-            <Link to="/">Storyteller</Link>
-            <Link to="/learning-plan">Learning plan</Link>
-            <Link to="/appendix">Appendix</Link>
-            {chapters.map((ch) => (
-              <Link key={ch.id} to={`/chapter/${ch.slug}`}>
-                {ch.number}. {ch.title}
-              </Link>
-            ))}
-          </nav>
-        </aside>
-        <main className="main">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/learning-plan" element={<LearningPlanPage />} />
-            <Route path="/chapter/:slug" element={<ChapterPage />} />
-            <Route path="/appendix" element={<AppendixPage />} />
-          </Routes>
-        </main>
-      </div>
+      <Routes>
+        <Route element={<AppShell />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/learning-plan" element={<LearningPlanPage />} />
+          <Route path="/chapter/:slug" element={<ChapterPage />} />
+          <Route path="/chapter/:slug/focus" element={<LabFocusPage />} />
+          <Route path="/appendix" element={<AppendixPage />} />
+        </Route>
+      </Routes>
     </HashRouter>
   )
 }
