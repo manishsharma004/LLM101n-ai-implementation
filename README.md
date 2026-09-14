@@ -11,6 +11,8 @@ After merge to `master`, GitHub Actions (`.github/workflows/deploy.yml`) publish
 
 **Runtime architecture:** [interactive Archify map](public/architecture/llm101n-runtime.architecture.html) — regenerate with `bash scripts/architecture-deliver.sh` (see [docs/architecture/README.md](docs/architecture/README.md)).
 
+**Learning plan:** [Six-phase roadmap](docs/LEARNING_ROADMAP.md) (micrograd → makemore → tokenizer → GPT → scaling/RLHF), also in the app at `#/learning-plan`.
+
 ---
 
 **!!! NOTE: the official Eureka Labs course does not yet exist. This repo follows the archived [karpathy/LLM101n](https://github.com/karpathy/LLM101n) syllabus. !!!**
