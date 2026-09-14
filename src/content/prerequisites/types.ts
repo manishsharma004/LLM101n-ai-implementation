@@ -3,8 +3,12 @@ import type { LabId } from '../types'
 export type PrereqSection = {
   id: string
   heading: string
-  paragraphs?: string[]
-  bullets: string[]
+  paragraphs: string[]
+  bullets?: string[]
+  keyTerms?: { term: string; definition: string }[]
+  code?: { language: string; body: string; caption?: string }
+  checkYourself?: { prompt: string; reveal: string }[]
+  callout?: { tone: 'tip' | 'note' | 'interview'; body: string }
 }
 
 export type PrerequisiteUnit = {

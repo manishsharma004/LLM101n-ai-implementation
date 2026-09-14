@@ -70,14 +70,44 @@ export function PrerequisiteUnitPage() {
           {unit.sections.map((section) => (
             <section key={section.id} className="part">
               <h2>{section.heading}</h2>
-              {section.paragraphs?.map((p, i) => (
+              {section.paragraphs.map((p, i) => (
                 <p key={i}>{p}</p>
               ))}
-              <ul>
-                {section.bullets.map((b) => (
-                  <li key={b}>{b}</li>
-                ))}
-              </ul>
+              {section.keyTerms?.length ? (
+                <dl className="terms">
+                  {section.keyTerms.map((t) => (
+                    <div key={t.term}>
+                      <dt>{t.term}</dt>
+                      <dd>{t.definition}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : null}
+              {section.code ? (
+                <figure className="code-block">
+                  <figcaption>
+                    {section.code.caption ? `${section.code.caption} · ` : null}
+                    <span className="code-lang">{section.code.language}</span>
+                  </figcaption>
+                  <pre><code>{section.code.body}</code></pre>
+                </figure>
+              ) : null}
+              {section.checkYourself?.map((c, i) => (
+                <details key={i} className="check">
+                  <summary>{c.prompt}</summary>
+                  <p>{c.reveal}</p>
+                </details>
+              ))}
+              {section.callout ? (
+                <aside className={`callout ${section.callout.tone}`}>{section.callout.body}</aside>
+              ) : null}
+              {section.bullets?.length ? (
+                <ul className="section-summary">
+                  {section.bullets.map((b) => (
+                    <li key={b}>{b}</li>
+                  ))}
+                </ul>
+              ) : null}
             </section>
           ))}
 
