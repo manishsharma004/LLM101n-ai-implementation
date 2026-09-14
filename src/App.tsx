@@ -2,6 +2,7 @@ import { HashRouter, Link, Route, Routes } from 'react-router-dom'
 import { chapters } from './content/chapters'
 import { AppendixPage, ChapterPage } from './pages/ChapterPage'
 import { HomePage } from './pages/HomePage'
+import { LearningPlanPage } from './pages/LearningPlanPage'
 import './index.css'
 
 export function App() {
@@ -14,6 +15,7 @@ export function App() {
           </div>
           <nav className="sidebar-nav">
             <Link to="/">Storyteller</Link>
+            <Link to="/learning-plan">Learning plan</Link>
             <Link to="/appendix">Appendix</Link>
             {chapters.map((ch) => (
               <Link key={ch.id} to={`/chapter/${ch.slug}`}>
@@ -25,6 +27,7 @@ export function App() {
         <main className="main">
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/learning-plan" element={<LearningPlanPage />} />
             <Route path="/chapter/:slug" element={<ChapterPage />} />
             <Route path="/appendix" element={<AppendixPage />} />
           </Routes>

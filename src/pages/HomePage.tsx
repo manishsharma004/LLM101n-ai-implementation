@@ -34,8 +34,9 @@ export function HomePage() {
       <section className="guided-path">
         <h2>Start here (self-learners)</h2>
         <p className="muted">
-          Work chapters 01→06 before transformers and finetuning: bigram sampling, micrograd, MLP, attention, transformer
-          stack, tokenization.
+          Follow the full{' '}
+          <Link to="/learning-plan">six-phase learning plan</Link> (11 Karpathy resources + browser labs). Quick path:
+          chapters 01→06 before transformers and finetuning.
         </p>
         <ol className="syllabus guided">
           {chapters
