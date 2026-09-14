@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { TopUtilityBar } from '../components/layout/TopUtilityBar'
 import { getChapterBySlug } from '../content/chapters'
 import {
   getResourceById,
@@ -8,7 +9,9 @@ import {
 
 export function LearningPlanPage() {
   return (
-    <article className="page learning-plan">
+    <div className="workspace-page">
+      <TopUtilityBar crumbs={[{ label: 'Home', to: '/' }, { label: 'Learning plan' }]} />
+    <article className="page learning-plan panel-surface">
       <header>
         <p className="eyebrow">Learning plan</p>
         <h1>Six-phase roadmap</h1>
@@ -102,5 +105,6 @@ export function LearningPlanPage() {
         <Link to="/">← Back to Storyteller home</Link>
       </p>
     </article>
+    </div>
   )
 }
