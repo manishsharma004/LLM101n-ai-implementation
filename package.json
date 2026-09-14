@@ -12,7 +12,8 @@
     "test": "node --experimental-strip-types --test tests/*.test.js",
     "archify:install": "bash scripts/install-archify-skill.sh",
     "architecture:deliver": "bash scripts/architecture-deliver.sh",
-    "screenshots": "node scripts/capture-screenshots.mjs"
+    "screenshots": "node scripts/capture-screenshots.mjs",
+    "screenshots:prereq": "node scripts/capture-prereq-screenshots.mjs"
   },
   "dependencies": {
     "katex": "^0.16.11",
