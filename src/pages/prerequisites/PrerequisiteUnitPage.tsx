@@ -131,7 +131,7 @@ export function PrerequisiteUnitPage() {
         </article>
 
         {unit.labId ? (
-          <aside className="chapter-split-lab panel-surface">
+          <aside className="chapter-split-lab lab-dock panel-surface">
             <h2>Interactive code</h2>
             <LabPanel labIds={[unit.labId]} variant="ide" />
           </aside>

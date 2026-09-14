@@ -6,12 +6,13 @@ type Props = {
   message: string
   error: string | null
   onRetry?: () => void
+  compact?: boolean
 }
 
-export function RuntimeBanner({ phase, message, error, onRetry }: Props) {
+export function RuntimeBanner({ phase, message, error, onRetry, compact }: Props) {
   const state = phase === 'error' ? 'error' : phase === 'ready' ? 'ready' : 'loading'
   return (
-    <div className={`runtime-banner runtime-banner--${state}`} role="status">
+    <div className={`runtime-banner runtime-banner--${state}${compact ? ' runtime-banner--compact' : ''}`} role="status">
       <div className="runtime-text">
         {state === 'error' && (
           <span>Pyodide failed: {error ?? 'unknown error'}</span>
