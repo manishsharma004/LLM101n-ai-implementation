@@ -1,10 +1,12 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ChapterInteractive } from '../components/chapter/ChapterInteractive'
 import { LabPanel } from '../components/LabPanel'
 import { TopUtilityBar } from '../components/layout/TopUtilityBar'
 import { getChapterBySlug } from '../content/chapters'
+import { MobileWorkspaceTabs } from '../components/layout/MobileWorkspaceTabs'
 import { useHorizontalSplit } from '../hooks/useHorizontalSplit'
+import { useMobileWorkspace } from '../hooks/useMediaQuery'
 import { touchStudyStreak } from '../lib/courseStats'
 
 export function LabFocusPage() {
@@ -15,6 +17,8 @@ export function LabFocusPage() {
     if (chapter) touchStudyStreak()
   }, [chapter?.id])
 
+  const isMobile = useMobileWorkspace()
+  const [mobileTab, setMobileTab] = useState<'inspector' | 'ide'>('ide')
   const { containerRef, gridTemplateColumns, onPointerDown } = useHorizontalSplit(
     'llm101n-lab-focus-split-v1',
     0.52,
@@ -48,12 +52,27 @@ export function LabFocusPage() {
           </Link>
         </div>
       </div>
+      {isMobile ? (
+        <MobileWorkspaceTabs
+          tabs={[
+            { id: 'inspector', label: 'Inspector' },
+            { id: 'ide', label: 'Code Lab' },
+          ]}
+          active={mobileTab}
+          onChange={(id) => setMobileTab(id as 'inspector' | 'ide')}
+          ariaLabel="Lab workspace"
+        />
+      ) : null}
+
       <div
         ref={containerRef}
-        className="lab-focus-split workspace-hsplit"
-        style={{ gridTemplateColumns }}
+        className={`lab-focus-split workspace-hsplit ${isMobile ? 'workspace-hsplit--stacked' : ''}`}
+        style={isMobile ? undefined : { gridTemplateColumns }}
       >
-        <section className="tensor-inspector panel-surface workspace-hsplit-pane">
+        <section
+          className="tensor-inspector panel-surface workspace-hsplit-pane"
+          hidden={isMobile && mobileTab !== 'inspector'}
+        >
           <h2>Tensor & attention inspector</h2>
           <p className="muted">
             Chapter interactives visualize shapes, masks, and precision—run code on the right to connect numbers to diagrams.
@@ -64,15 +83,20 @@ export function LabFocusPage() {
             <p className="muted">Heatmaps and loss curves appear in chapter figures and lab console output.</p>
           </div>
         </section>
-        <div
-          className="workspace-hsplit-handle"
-          role="separator"
-          aria-orientation="vertical"
-          aria-label="Resize inspector and IDE"
-          title="Drag to resize panels"
-          onPointerDown={onPointerDown}
-        />
-        <section className="lab-focus-editor lab-dock panel-surface workspace-hsplit-pane">
+        {!isMobile ? (
+          <div
+            className="workspace-hsplit-handle"
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize inspector and IDE"
+            title="Drag to resize panels"
+            onPointerDown={onPointerDown}
+          />
+        ) : null}
+        <section
+          className="lab-focus-editor lab-dock panel-surface workspace-hsplit-pane"
+          hidden={isMobile && mobileTab !== 'ide'}
+        >
           <LabPanel labIds={chapter.labIds} variant="ide" />
         </section>
       </div>
