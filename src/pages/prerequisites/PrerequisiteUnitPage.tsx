@@ -8,12 +8,16 @@ import {
   isPrereqUnitComplete,
   setPrereqUnitComplete,
 } from '../../lib/prerequisiteProgress'
+import { MobileWorkspaceTabs } from '../../components/layout/MobileWorkspaceTabs'
 import { useHorizontalSplit } from '../../hooks/useHorizontalSplit'
+import { useMobileWorkspace } from '../../hooks/useMediaQuery'
 
 export function PrerequisiteUnitPage() {
   const { slug } = useParams()
   const unit = slug ? getPrereqUnitBySlug(slug) : undefined
   const [done, setDone] = useState(() => (unit ? isPrereqUnitComplete(unit.id) : false))
+  const isMobile = useMobileWorkspace()
+  const [mobileTab, setMobileTab] = useState<'theory' | 'lab'>('theory')
   const { containerRef, gridTemplateColumns, onPointerDown } = useHorizontalSplit(
     'llm101n-prereq-split-v1',
     0.42,
@@ -70,12 +74,27 @@ export function PrerequisiteUnitPage() {
         ) : null}
       </header>
 
+      {isMobile && unit.labId ? (
+        <MobileWorkspaceTabs
+          tabs={[
+            { id: 'theory', label: 'Theory' },
+            { id: 'lab', label: 'Python sandbox' },
+          ]}
+          active={mobileTab}
+          onChange={(id) => setMobileTab(id as 'theory' | 'lab')}
+          ariaLabel="Prerequisite unit"
+        />
+      ) : null}
+
       <div
         ref={containerRef}
-        className="chapter-split prereq-split workspace-hsplit"
-        style={{ gridTemplateColumns }}
+        className={`chapter-split prereq-split workspace-hsplit ${isMobile ? 'workspace-hsplit--stacked' : ''}`}
+        style={isMobile ? undefined : { gridTemplateColumns }}
       >
-        <article className="chapter-split-theory panel-surface workspace-hsplit-pane">
+        <article
+          className="chapter-split-theory panel-surface workspace-hsplit-pane"
+          hidden={isMobile && unit.labId != null && mobileTab !== 'theory'}
+        >
           {unit.sections.map((section) => (
             <section key={section.id} className="part">
               <h2>{section.heading}</h2>
@@ -141,15 +160,20 @@ export function PrerequisiteUnitPage() {
 
         {unit.labId ? (
           <>
-            <div
-              className="workspace-hsplit-handle"
-              role="separator"
-              aria-orientation="vertical"
-              aria-label="Resize lesson and lab"
-              title="Drag to resize panels"
-              onPointerDown={onPointerDown}
-            />
-          <aside className="chapter-split-lab lab-dock panel-surface workspace-hsplit-pane">
+            {!isMobile ? (
+              <div
+                className="workspace-hsplit-handle"
+                role="separator"
+                aria-orientation="vertical"
+                aria-label="Resize lesson and lab"
+                title="Drag to resize panels"
+                onPointerDown={onPointerDown}
+              />
+            ) : null}
+          <aside
+            className="chapter-split-lab lab-dock panel-surface workspace-hsplit-pane"
+            hidden={isMobile && mobileTab !== 'lab'}
+          >
             <h2>Interactive code</h2>
             <LabPanel labIds={[unit.labId]} variant="ide" />
           </aside>

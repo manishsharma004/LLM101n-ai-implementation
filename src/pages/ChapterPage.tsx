@@ -9,7 +9,9 @@ import { appendixFigures, figuresForPart } from '../content/chapterFigures'
 import { appendixTopics, getChapterByNumber, getChapterBySlug } from '../content/chapters'
 import { phaseForChapterNumber } from '../content/curriculumPhases'
 import { useChapterReadProgress } from '../hooks/useChapterReadProgress'
+import { MobileWorkspaceTabs } from '../components/layout/MobileWorkspaceTabs'
 import { useHorizontalSplit } from '../hooks/useHorizontalSplit'
+import { useMobileWorkspace } from '../hooks/useMediaQuery'
 import { getBeginnerMode } from '../lib/beginnerMode'
 import { touchStudyStreak } from '../lib/courseStats'
 import { SearchAssistPanel } from '../components/SearchAssistPanel'
@@ -20,6 +22,8 @@ export function ChapterPage() {
   const [beginnerMode, setBeginnerMode] = useState(() => getBeginnerMode())
   const readPct = useChapterReadProgress('.chapter-split-theory', Boolean(chapter))
   const primaryLab = chapter ? getPrimaryLabId(chapter.labIds) : undefined
+  const isMobile = useMobileWorkspace()
+  const [mobileTab, setMobileTab] = useState<'theory' | 'lab'>('theory')
   const { containerRef, gridTemplateColumns, onPointerDown } = useHorizontalSplit(
     'llm101n-chapter-split-v1',
     0.42,
@@ -58,12 +62,27 @@ export function ChapterPage() {
         chapterProgress={readPct}
       />
 
+      {isMobile ? (
+        <MobileWorkspaceTabs
+          tabs={[
+            { id: 'theory', label: 'Theory & Math' },
+            { id: 'lab', label: 'Code Lab' },
+          ]}
+          active={mobileTab}
+          onChange={(id) => setMobileTab(id as 'theory' | 'lab')}
+          ariaLabel="Chapter workspace"
+        />
+      ) : null}
+
       <div
         ref={containerRef}
-        className="chapter-split workspace-hsplit"
-        style={{ gridTemplateColumns }}
+        className={`chapter-split workspace-hsplit ${isMobile ? 'workspace-hsplit--stacked' : ''}`}
+        style={isMobile ? undefined : { gridTemplateColumns }}
       >
-        <article className="chapter-split-theory panel-surface workspace-hsplit-pane">
+        <article
+          className="chapter-split-theory panel-surface workspace-hsplit-pane"
+          hidden={isMobile && mobileTab !== 'theory'}
+        >
           <header className="theory-header">
             <p className="eyebrow">
               Phase {phase?.number ?? '—'} · {chapter.syllabusTopic}
@@ -140,16 +159,22 @@ export function ChapterPage() {
           </nav>
         </article>
 
-        <div
-          className="workspace-hsplit-handle"
-          role="separator"
-          aria-orientation="vertical"
-          aria-label="Resize lesson and lab"
-          title="Drag to resize panels"
-          onPointerDown={onPointerDown}
-        />
+        {!isMobile ? (
+          <div
+            className="workspace-hsplit-handle"
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize lesson and lab"
+            title="Drag to resize panels"
+            onPointerDown={onPointerDown}
+          />
+        ) : null}
 
-        <aside className="chapter-split-lab lab-dock panel-surface workspace-hsplit-pane" aria-label="Interactive labs">
+        <aside
+          className="chapter-split-lab lab-dock panel-surface workspace-hsplit-pane"
+          aria-label="Interactive labs"
+          hidden={isMobile && mobileTab !== 'lab'}
+        >
           <div className="lab-column-head">
             <h2>Interactive code</h2>
             {primaryLab ? (

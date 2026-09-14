@@ -1595,41 +1595,305 @@ button.primary {
   .phase-roadmap {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .chapter-split {
-    grid-template-columns: 1fr;
-  }
-  .chapter-split-lab {
-    position: static;
-    max-height: none;
-  }
-
-  .chapter-split-lab.lab-dock {
-    overflow: visible;
-  }
-
-  .lab-editor-pane {
-    max-height: 20rem;
-  }
 }
 
+/* —— Mobile workspace (iPhone / Pixel) —— */
 @media (max-width: 900px) {
   .app-shell-v2 {
     grid-template-columns: 1fr;
   }
+
   .app-sidebar {
-    position: relative;
-    height: auto;
-    max-height: 45vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 180;
+    width: min(288px, 88vw);
+    height: 100dvh;
+    max-height: none;
+    transform: translateX(-105%);
+    transition: transform 0.22s ease;
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.45);
   }
+
+  .app-shell-v2.nav-open .app-sidebar {
+    transform: translateX(0);
+  }
+
+  .mobile-nav-toggle {
+    position: fixed;
+    top: 0.65rem;
+    left: 0.65rem;
+    z-index: 190;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  }
+
+  .mobile-nav-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 170;
+    border: none;
+    background: rgba(2, 6, 23, 0.55);
+    cursor: pointer;
+  }
+
+  .app-main-column {
+    padding: 0 0.85rem 5.5rem;
+    padding-top: 3.25rem;
+  }
+
+  .top-utility-bar {
+    padding-top: 0.35rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .utility-left {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .breadcrumbs {
+    font-size: 0.72rem;
+    line-height: 1.35;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .chapter-progress-row {
+    flex-wrap: wrap;
+  }
+
+  .progress-track {
+    flex: 1;
+    width: auto;
+    min-width: 5rem;
+  }
+
+  .utility-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .beginner-toggle {
+    width: 100%;
+    justify-content: space-between;
+  }
+
   .phase-roadmap {
     grid-template-columns: 1fr;
   }
-  .lab-focus-split {
-    grid-template-columns: 1fr;
+
+  .chapter-workspace,
+  .lab-focus-page,
+  .prereq-unit-page {
+    min-height: auto;
   }
+
+  .workspace-mobile-tabs {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 0.65rem;
+    position: sticky;
+    top: 3rem;
+    z-index: 15;
+    padding: 0.35rem 0;
+    background: rgba(15, 23, 42, 0.94);
+    backdrop-filter: blur(8px);
+  }
+
+  .workspace-mobile-tabs button {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.55rem 0.65rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: var(--panel-deep);
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .workspace-mobile-tabs button.active {
+    color: var(--text);
+    border-color: var(--accent);
+    background: rgba(56, 189, 248, 0.12);
+    box-shadow: 0 0 0 1px var(--cyan-glow);
+  }
+
+  .workspace-hsplit--stacked,
+  .workspace-hsplit--stacked.chapter-split,
+  .workspace-hsplit--stacked.lab-focus-split {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-height: 0;
+    grid-template-columns: unset !important;
+  }
+
+  .workspace-hsplit--stacked .workspace-hsplit-handle {
+    display: none !important;
+  }
+
+  .workspace-hsplit--stacked .workspace-hsplit-pane[hidden] {
+    display: none !important;
+  }
+
+  .workspace-hsplit--stacked .workspace-hsplit-pane:not([hidden]) {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .chapter-split-lab {
+    position: static;
+    height: auto;
+    max-height: none;
+    min-height: min(72dvh, 640px);
+  }
+
+  .chapter-split-lab.lab-dock {
+    overflow: hidden;
+  }
+
+  .lab-focus-split {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-height: 0;
+  }
+
+  .lab-focus-editor.lab-dock {
+    height: auto;
+    min-height: min(72dvh, 640px);
+    max-height: none;
+  }
+
+  .lab-focus-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .lab-focus-toolbar h1 {
+    font-size: 1rem;
+  }
+
+  .lab-focus-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .lab-editor-pane {
+    max-height: none;
+  }
+
+  .panel-surface {
+    padding: 1rem 1rem;
+  }
+
   .floating-tutor {
     right: 0.5rem;
     bottom: 0.5rem;
+    max-width: calc(100vw - 1rem);
+  }
+
+  .prereq-unit-grid,
+  .prereq-unit-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .prereq-unit-card.prereq-unit-row {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 0.85rem;
+    padding: 0.85rem 1rem;
+    min-height: auto;
+  }
+
+  .prereq-unit-row .prereq-card-icon {
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 1.35rem;
+  }
+
+  .prereq-unit-row h2 {
+    font-size: 1rem;
+    margin: 0.15rem 0;
+  }
+
+  .prereq-unit-row .prereq-hours,
+  .prereq-unit-row .prereq-card-meta {
+    display: none;
+  }
+
+  .prereq-unit-row .prereq-start-btn {
+    margin-left: auto;
+    flex-shrink: 0;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .prereq-hub-progress-card {
+    display: flex !important;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    padding: 1rem;
+  }
+
+  .prereq-hub-ring {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px var(--cyan-glow);
+  }
+
+  .prereq-hub-ring-value {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--accent);
+  }
+
+  .prereq-hub-progress-copy {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .prereq-hub-footer-cta {
+    display: block;
+    margin-top: 1.25rem;
+    padding-bottom: 1rem;
+  }
+
+  .prereq-graduate-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    text-decoration: none;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    font-weight: 700;
   }
 }
 
@@ -1670,6 +1934,14 @@ button.primary {
   background: linear-gradient(90deg, var(--accent), #22d3ee);
   border-radius: 999px;
   transition: width 0.2s ease;
+}
+
+.prereq-hub-progress-card {
+  display: none;
+}
+
+.prereq-hub-footer-cta {
+  display: none;
 }
 
 .prereq-unit-grid {
