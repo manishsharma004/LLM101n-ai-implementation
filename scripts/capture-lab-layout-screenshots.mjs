@@ -29,9 +29,20 @@ for (const { file, hash, clip } of pages) {
   await page.waitForTimeout(2000)
   const el = page.locator(clip)
   await el.screenshot({ path: path.join(outDir, file) })
-  const editorH = await page.locator('.lab-editor-pane').evaluate((n) => n.getBoundingClientRect().height)
-  const actionsVisible = await page.locator('.lab-actions--pinned').isVisible()
-  console.log('wrote', file, 'editorPaneHeight=', Math.round(editorH), 'actionsVisible=', actionsVisible)
+  const metrics = await page.locator('.lab-ide-body').evaluate((body) => {
+    const editor = body.querySelector('.lab-editor-pane')
+    const console = body.querySelector('.lab-console--grow')
+    const br = (el) => (el ? el.getBoundingClientRect() : { height: 0, bottom: 0 })
+    const bodyR = body.getBoundingClientRect()
+    const consoleR = br(console)
+    return {
+      bodyH: Math.round(bodyR.height),
+      editorH: Math.round(br(editor).height),
+      consoleH: Math.round(consoleR.height),
+      gapBelowConsole: Math.round(bodyR.bottom - consoleR.bottom),
+    }
+  })
+  console.log('wrote', file, metrics)
   await page.close()
 }
 

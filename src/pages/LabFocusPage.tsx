@@ -4,6 +4,7 @@ import { ChapterInteractive } from '../components/chapter/ChapterInteractive'
 import { LabPanel } from '../components/LabPanel'
 import { TopUtilityBar } from '../components/layout/TopUtilityBar'
 import { getChapterBySlug } from '../content/chapters'
+import { useHorizontalSplit } from '../hooks/useHorizontalSplit'
 import { touchStudyStreak } from '../lib/courseStats'
 
 export function LabFocusPage() {
@@ -13,6 +14,11 @@ export function LabFocusPage() {
   useEffect(() => {
     if (chapter) touchStudyStreak()
   }, [chapter?.id])
+
+  const { containerRef, gridTemplateColumns, onPointerDown } = useHorizontalSplit(
+    'llm101n-lab-focus-split-v1',
+    0.52,
+  )
 
   if (!chapter) {
     return (
@@ -42,8 +48,12 @@ export function LabFocusPage() {
           </Link>
         </div>
       </div>
-      <div className="lab-focus-split">
-        <section className="tensor-inspector panel-surface">
+      <div
+        ref={containerRef}
+        className="lab-focus-split workspace-hsplit"
+        style={{ gridTemplateColumns }}
+      >
+        <section className="tensor-inspector panel-surface workspace-hsplit-pane">
           <h2>Tensor & attention inspector</h2>
           <p className="muted">
             Chapter interactives visualize shapes, masks, and precision—run code on the right to connect numbers to diagrams.
@@ -54,7 +64,15 @@ export function LabFocusPage() {
             <p className="muted">Heatmaps and loss curves appear in chapter figures and lab console output.</p>
           </div>
         </section>
-        <section className="lab-focus-editor lab-dock panel-surface">
+        <div
+          className="workspace-hsplit-handle"
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize inspector and IDE"
+          title="Drag to resize panels"
+          onPointerDown={onPointerDown}
+        />
+        <section className="lab-focus-editor lab-dock panel-surface workspace-hsplit-pane">
           <LabPanel labIds={chapter.labIds} variant="ide" />
         </section>
       </div>

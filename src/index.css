@@ -428,21 +428,73 @@ a {
 /* Chapter split workspace */
 .chapter-split {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 42%);
-  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) 6px minmax(320px, 1fr);
+  gap: 0;
   align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.workspace-hsplit {
+  min-height: 0;
+}
+
+.workspace-hsplit-pane {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.workspace-hsplit-handle {
+  flex-shrink: 0;
+  width: 6px;
+  margin: 0 -1px;
+  border-radius: 4px;
+  background: var(--border);
+  cursor: col-resize;
+  touch-action: none;
+  align-self: stretch;
+  position: relative;
+  z-index: 1;
+}
+
+.workspace-hsplit-handle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 2.5rem;
+  border-radius: 2px;
+  background: var(--accent);
+  opacity: 0.65;
+}
+
+.workspace-hsplit-handle:hover,
+.workspace-hsplit-handle:active {
+  background: rgba(56, 189, 248, 0.25);
 }
 
 .chapter-split-theory {
   min-width: 0;
 }
 
+.chapter-workspace {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  box-sizing: border-box;
+}
+
 .chapter-split-lab {
   position: sticky;
   top: 5.5rem;
-  height: calc(100vh - 6rem);
+  height: 100%;
   max-height: calc(100vh - 6rem);
+  min-height: min(28rem, calc(100vh - 6rem));
   min-width: 0;
+  align-self: stretch;
 }
 
 .chapter-split-lab.lab-dock {
@@ -468,9 +520,12 @@ a {
 }
 
 .chapter-split-lab.lab-dock .py-lab--ide,
-.lab-focus-editor.lab-dock .py-lab--ide {
-  flex: 1;
+.lab-focus-editor.lab-dock .py-lab--ide,
+.chapter-split-lab.lab-dock .labs > .py-lab--ide,
+.lab-focus-editor.lab-dock .labs > .py-lab--ide {
+  flex: 1 1 auto;
   min-height: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -480,7 +535,8 @@ a {
   flex-direction: column;
   gap: 0.5rem;
   min-height: 0;
-  flex: 1;
+  flex: 1 1 auto;
+  height: 100%;
 }
 
 .lab-ide-meta {
@@ -578,8 +634,8 @@ a {
 }
 
 .lab-console--grow {
-  flex: 1 1 auto;
-  min-height: 5.5rem;
+  flex: 1 1 0;
+  min-height: 6rem;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -677,29 +733,31 @@ a {
   font-size: 1.15rem;
 }
 
+.lab-focus-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  box-sizing: border-box;
+}
+
 .lab-focus-split {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(0, 1.2fr);
-  gap: 1rem;
-  min-height: calc(100vh - 9rem);
+  grid-template-columns: minmax(280px, 1fr) 6px minmax(360px, 1.2fr);
+  gap: 0;
+  flex: 1 1 auto;
+  min-height: 0;
   align-items: stretch;
 }
 
 .lab-focus-editor.lab-dock {
-  height: calc(100vh - 9rem);
-  max-height: calc(100vh - 9rem);
+  height: 100%;
+  min-height: 0;
+  max-height: none;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   padding: 0.75rem 0.85rem;
   box-sizing: border-box;
-}
-
-.lab-focus-editor.lab-dock .py-lab--ide {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
 }
 
 .tensor-placeholder {

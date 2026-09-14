@@ -9,6 +9,7 @@ import { appendixFigures, figuresForPart } from '../content/chapterFigures'
 import { appendixTopics, getChapterByNumber, getChapterBySlug } from '../content/chapters'
 import { phaseForChapterNumber } from '../content/curriculumPhases'
 import { useChapterReadProgress } from '../hooks/useChapterReadProgress'
+import { useHorizontalSplit } from '../hooks/useHorizontalSplit'
 import { getBeginnerMode } from '../lib/beginnerMode'
 import { touchStudyStreak } from '../lib/courseStats'
 import { SearchAssistPanel } from '../components/SearchAssistPanel'
@@ -19,6 +20,10 @@ export function ChapterPage() {
   const [beginnerMode, setBeginnerMode] = useState(() => getBeginnerMode())
   const readPct = useChapterReadProgress('.chapter-split-theory', Boolean(chapter))
   const primaryLab = chapter ? getPrimaryLabId(chapter.labIds) : undefined
+  const { containerRef, gridTemplateColumns, onPointerDown } = useHorizontalSplit(
+    'llm101n-chapter-split-v1',
+    0.42,
+  )
 
   useEffect(() => {
     if (chapter) touchStudyStreak()
@@ -53,8 +58,12 @@ export function ChapterPage() {
         chapterProgress={readPct}
       />
 
-      <div className="chapter-split">
-        <article className="chapter-split-theory panel-surface">
+      <div
+        ref={containerRef}
+        className="chapter-split workspace-hsplit"
+        style={{ gridTemplateColumns }}
+      >
+        <article className="chapter-split-theory panel-surface workspace-hsplit-pane">
           <header className="theory-header">
             <p className="eyebrow">
               Phase {phase?.number ?? '—'} · {chapter.syllabusTopic}
@@ -131,7 +140,16 @@ export function ChapterPage() {
           </nav>
         </article>
 
-        <aside className="chapter-split-lab lab-dock panel-surface" aria-label="Interactive labs">
+        <div
+          className="workspace-hsplit-handle"
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize lesson and lab"
+          title="Drag to resize panels"
+          onPointerDown={onPointerDown}
+        />
+
+        <aside className="chapter-split-lab lab-dock panel-surface workspace-hsplit-pane" aria-label="Interactive labs">
           <div className="lab-column-head">
             <h2>Interactive code</h2>
             {primaryLab ? (
