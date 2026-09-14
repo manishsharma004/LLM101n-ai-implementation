@@ -4,6 +4,8 @@ import { AppendixPage, ChapterPage } from './pages/ChapterPage'
 import { HomePage } from './pages/HomePage'
 import { LabFocusPage } from './pages/LabFocusPage'
 import { LearningPlanPage } from './pages/LearningPlanPage'
+import { PrerequisitesHubPage } from './pages/prerequisites/PrerequisitesHubPage'
+import { PrerequisiteUnitPage } from './pages/prerequisites/PrerequisiteUnitPage'
 import './index.css'
 
 export function App() {
@@ -13,6 +15,8 @@ export function App() {
         <Route element={<AppShell />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/learning-plan" element={<LearningPlanPage />} />
+          <Route path="/prerequisites" element={<PrerequisitesHubPage />} />
+          <Route path="/prerequisites/:slug" element={<PrerequisiteUnitPage />} />
           <Route path="/chapter/:slug" element={<ChapterPage />} />
           <Route path="/chapter/:slug/focus" element={<LabFocusPage />} />
           <Route path="/appendix" element={<AppendixPage />} />

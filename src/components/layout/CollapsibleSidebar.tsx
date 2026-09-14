@@ -41,8 +41,20 @@ export function CollapsibleSidebar() {
       </div>
 
       <nav className="sidebar-primary">
-        <Link to="/" className={isActive('/') && !location.pathname.includes('chapter') ? 'active' : ''}>
+        <Link
+          to="/"
+          className={
+            isActive('/') &&
+            !location.pathname.includes('chapter') &&
+            !location.pathname.includes('prerequisites')
+              ? 'active'
+              : ''
+          }
+        >
           Course modules
+        </Link>
+        <Link to="/prerequisites" className={isActive('prerequisites') ? 'active' : ''}>
+          Prerequisites
         </Link>
         <Link to="/learning-plan" className={isActive('learning-plan') ? 'active' : ''}>
           Learning plan

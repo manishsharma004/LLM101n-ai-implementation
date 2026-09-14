@@ -1,4 +1,5 @@
 export type LabId =
+  | 'python-quickstart'
   | 'bigram'
   | 'micrograd'
   | 'mlp'

@@ -31,6 +31,10 @@ export function HomePage() {
         <p className="subtitle">
           Track progress across 17 chapters in four phases. Each module includes theory, diagrams, and Pyodide labs.
         </p>
+        <p className="prereq-cta">
+          New to Python or PyTorch? Start the{' '}
+          <Link to="/prerequisites">prerequisites subpath</Link> (Units 0.0–0.5) before Phase 1.
+        </p>
       </header>
 
       <StorytellerPanel />

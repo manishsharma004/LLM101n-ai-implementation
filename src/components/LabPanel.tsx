@@ -18,6 +18,7 @@ import {
   WORKERS_STARTER_PYTHON,
 } from '../labs/pythonLabStarters'
 import { MICROGRAD_STARTER_PYTHON } from '../labs/microgradStarterPython'
+import { PYTHON_PREREQ_STARTER } from '../labs/pythonPrereqStarter'
 import { PyodideCodeLab } from './PyodideCodeLab'
 
 const PY_LAB: Partial<
@@ -26,6 +27,13 @@ const PY_LAB: Partial<
     { title: string; description?: string; code: string; runLabel?: string; minLines?: number }
   >
 > = {
+  'python-quickstart': {
+    title: 'Lab: Python quickstart patterns',
+    description: 'Lists, zip, dict counts, operator overloading — same idioms as micrograd.',
+    code: PYTHON_PREREQ_STARTER,
+    runLabel: 'Run quickstart',
+    minLines: 16,
+  },
   bigram: {
     title: 'Lab: Bigram training & sampling (Python)',
     description: 'Train character bigrams on the TinyStories sample shard and sample text.',
