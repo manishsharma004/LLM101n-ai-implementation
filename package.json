@@ -9,7 +9,7 @@
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b",
     "preview": "vite preview",
-    "test": "node --experimental-strip-types --test tests/*.test.js",
+    "test": "node --experimental-strip-types --test tests/*.test.js tests/**/*.test.js",
     "archify:install": "bash scripts/install-archify-skill.sh",
     "architecture:deliver": "bash scripts/architecture-deliver.sh",
     "screenshots": "node scripts/capture-screenshots.mjs",

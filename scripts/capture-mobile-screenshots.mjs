@@ -19,6 +19,9 @@ const routes = [
   { hash: '#/prerequisites', file: 'mobile-prereq-hub' },
   { hash: '#/chapter/bigram-language-model', file: 'mobile-chapter-bigram' },
   { hash: '#/prerequisites/autograd-micrograd', file: 'mobile-prereq-micrograd' },
+  { hash: '#/prerequisites/bpe-tokenization', file: 'mobile-prereq-bpe' },
+  { hash: '#/chapter/multimodal', file: 'mobile-chapter-multimodal' },
+  { hash: '#/prerequisites/graduation', file: 'mobile-prereq-graduation' },
 ]
 
 await mkdir(outDir, { recursive: true })

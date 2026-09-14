@@ -8,7 +8,10 @@ import {
   isPrereqUnitComplete,
   setPrereqUnitComplete,
 } from '../../lib/prerequisiteProgress'
+import { BpeTokenizerMobile } from '../../components/mobile/BpeTokenizerMobile'
+import { MicrogradDagMobile } from '../../components/mobile/MicrogradDagMobile'
 import { MobileWorkspaceTabs } from '../../components/layout/MobileWorkspaceTabs'
+import { prereqMobileTabs, type PrereqMobileTabId } from '../../content/mobilePrereqTabs'
 import { useHorizontalSplit } from '../../hooks/useHorizontalSplit'
 import { useMobileWorkspace } from '../../hooks/useMediaQuery'
 
@@ -17,7 +20,7 @@ export function PrerequisiteUnitPage() {
   const unit = slug ? getPrereqUnitBySlug(slug) : undefined
   const [done, setDone] = useState(() => (unit ? isPrereqUnitComplete(unit.id) : false))
   const isMobile = useMobileWorkspace()
-  const [mobileTab, setMobileTab] = useState<'theory' | 'lab'>('theory')
+  const [mobileTab, setMobileTab] = useState<PrereqMobileTabId>('theory')
   const { containerRef, gridTemplateColumns, onPointerDown } = useHorizontalSplit(
     'llm101n-prereq-split-v1',
     0.42,
@@ -76,12 +79,9 @@ export function PrerequisiteUnitPage() {
 
       {isMobile && unit.labId ? (
         <MobileWorkspaceTabs
-          tabs={[
-            { id: 'theory', label: 'Theory' },
-            { id: 'lab', label: 'Python sandbox' },
-          ]}
+          tabs={prereqMobileTabs(unit.slug, Boolean(unit.labId))}
           active={mobileTab}
-          onChange={(id) => setMobileTab(id as 'theory' | 'lab')}
+          onChange={(id) => setMobileTab(id as PrereqMobileTabId)}
           ariaLabel="Prerequisite unit"
         />
       ) : null}
@@ -157,6 +157,18 @@ export function PrerequisiteUnitPage() {
             )}
           </nav>
         </article>
+
+        {isMobile && mobileTab === 'graph' && unit.slug === 'autograd-micrograd' ? (
+          <div className="workspace-hsplit-pane mobile-rich-pane">
+            <MicrogradDagMobile />
+          </div>
+        ) : null}
+
+        {isMobile && mobileTab === 'bpe' && unit.slug === 'bpe-tokenization' ? (
+          <div className="workspace-hsplit-pane mobile-rich-pane">
+            <BpeTokenizerMobile />
+          </div>
+        ) : null}
 
         {unit.labId ? (
           <>

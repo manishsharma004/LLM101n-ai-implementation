@@ -15,6 +15,7 @@ import { useMobileWorkspace } from '../hooks/useMediaQuery'
 import { getBeginnerMode } from '../lib/beginnerMode'
 import { touchStudyStreak } from '../lib/courseStats'
 import { SearchAssistPanel } from '../components/SearchAssistPanel'
+import { MultimodalStoryMobile } from '../components/mobile/MultimodalStoryMobile'
 
 export function ChapterPage() {
   const { slug } = useParams()
@@ -83,6 +84,8 @@ export function ChapterPage() {
           className="chapter-split-theory panel-surface workspace-hsplit-pane"
           hidden={isMobile && mobileTab !== 'theory'}
         >
+          {isMobile && chapter.slug === 'multimodal' ? <MultimodalStoryMobile /> : null}
+
           <header className="theory-header">
             <p className="eyebrow">
               Phase {phase?.number ?? '—'} · {chapter.syllabusTopic}

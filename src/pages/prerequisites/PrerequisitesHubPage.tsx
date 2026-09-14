@@ -73,8 +73,11 @@ export function PrerequisitesHubPage() {
       </ul>
 
       <div className="prereq-hub-footer-cta">
-        <Link to="/chapter/bigram-language-model" className="primary prereq-graduate-btn">
-          Start Chapter 1
+        <Link to="/prerequisites/graduation" className="primary prereq-graduate-btn">
+          {done >= total ? 'Graduation quiz' : 'Graduation quiz (complete units)'}
+        </Link>
+        <Link to="/chapter/bigram-language-model" className="btn-text prereq-chapter-one-link">
+          Start Chapter 1 →
         </Link>
       </div>
     </div>
