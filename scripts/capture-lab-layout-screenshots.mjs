@@ -12,6 +12,7 @@ const chromePath =
 const pages = [
   { file: 'lab-layout-prereq.png', hash: '#/prerequisites/python-quickstart', clip: '.lab-dock' },
   { file: 'lab-layout-chapter.png', hash: '#/chapter/attention', clip: '.lab-dock' },
+  { file: 'lab-layout-focus.png', hash: '#/chapter/attention/focus', clip: '.lab-focus-editor' },
 ]
 
 await mkdir(outDir, { recursive: true })
