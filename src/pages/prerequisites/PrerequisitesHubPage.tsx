@@ -29,20 +29,28 @@ export function PrerequisitesHubPage() {
       />
 
       <header className="prereq-hub-header">
-        <Link to="/" className="back-to-course">← Back to Main Course (LLM101n Storyteller)</Link>
-        <p className="subpath-progress-label">
-          Subpath progress: <strong>{done}</strong> of <strong>{total}</strong> units completed
-        </p>
-        <div className="subpath-progress-track" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-          <div className="subpath-progress-fill" style={{ width: `${pct}%` }} />
+        <Link to="/" className="back-to-course">← Back to Main Course</Link>
+        <div className="prereq-hub-progress-card panel-surface">
+          <div className="prereq-hub-ring" aria-hidden>
+            <span className="prereq-hub-ring-value">{pct}%</span>
+          </div>
+          <div className="prereq-hub-progress-copy">
+            <p className="subpath-progress-label">
+              <strong>{done}</strong> of <strong>{total}</strong> units completed
+            </p>
+            <div className="subpath-progress-track" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+              <div className="subpath-progress-fill" style={{ width: `${pct}%` }} />
+            </div>
+          </div>
         </div>
       </header>
 
-      <div className="prereq-unit-grid">
+      <ul className="prereq-unit-grid prereq-unit-list">
         {prerequisiteUnits.map((unit) => {
           const complete = isPrereqUnitComplete(unit.id)
           return (
-            <article key={unit.id} className={`prereq-unit-card ${complete ? 'complete' : ''}`}>
+            <li key={unit.id}>
+            <article className={`prereq-unit-card prereq-unit-row ${complete ? 'complete' : ''}`}>
               <div className="prereq-card-icon" aria-hidden>{unit.iconGlyph}</div>
               <p className="prereq-unit-label">Unit {unit.unitLabel}</p>
               <h2>{unit.title}</h2>
@@ -59,8 +67,15 @@ export function PrerequisitesHubPage() {
                 {complete ? 'Review unit' : 'Start unit'}
               </Link>
             </article>
+            </li>
           )
         })}
+      </ul>
+
+      <div className="prereq-hub-footer-cta">
+        <Link to="/chapter/bigram-language-model" className="primary prereq-graduate-btn">
+          Start Chapter 1
+        </Link>
       </div>
     </div>
   )

@@ -14,7 +14,8 @@
     "architecture:deliver": "bash scripts/architecture-deliver.sh",
     "screenshots": "node scripts/capture-screenshots.mjs",
     "screenshots:prereq": "node scripts/capture-prereq-screenshots.mjs",
-    "screenshots:lab": "node scripts/capture-lab-layout-screenshots.mjs"
+    "screenshots:lab": "node scripts/capture-lab-layout-screenshots.mjs",
+    "screenshots:mobile": "node scripts/capture-mobile-screenshots.mjs"
   },
   "dependencies": {
     "katex": "^0.16.11",
