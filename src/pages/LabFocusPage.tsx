@@ -54,7 +54,7 @@ export function LabFocusPage() {
             <p className="muted">Heatmaps and loss curves appear in chapter figures and lab console output.</p>
           </div>
         </section>
-        <section className="lab-focus-editor panel-surface">
+        <section className="lab-focus-editor lab-dock panel-surface">
           <LabPanel labIds={chapter.labIds} variant="ide" />
         </section>
       </div>

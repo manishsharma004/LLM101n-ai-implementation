@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useLabEditorHeight } from '../hooks/useLabEditorHeight'
 import { MonacoEditor } from './MonacoEditor'
 import { RuntimeBanner } from './RuntimeBanner'
 import { RUNNER_PROGRAM } from '../lib/pyRunner'
@@ -71,6 +72,7 @@ export function PyodideCodeLab({
   }
 
   const ide = variant === 'ide'
+  const { bodyRef, editorHeight, onPointerDown } = useLabEditorHeight()
 
   if (ide) {
     return (
@@ -93,25 +95,35 @@ export function PyodideCodeLab({
             onRetry={retry}
             compact
           />
-          <div className="lab-editor-pane">
-            <MonacoEditor
-              value={code}
-              onChange={setCode}
-              language="python"
-              minLines={editorMinLines}
-              ariaLabel="Python lab code"
-              constrained
+          <div ref={bodyRef} className="lab-ide-body">
+            <div className="lab-editor-pane" style={{ height: editorHeight }}>
+              <MonacoEditor
+                value={code}
+                onChange={setCode}
+                language="python"
+                minLines={editorMinLines}
+                ariaLabel="Python lab code"
+                constrained
+              />
+            </div>
+            <div
+              className="lab-vsplit-handle"
+              role="separator"
+              aria-orientation="horizontal"
+              aria-label="Resize editor and console"
+              title="Drag to resize editor and console"
+              onPointerDown={onPointerDown}
             />
-          </div>
-          <div className="lab-actions lab-actions--pinned">
-            <button type="button" className="primary btn-run-code" disabled={!ready || running} onClick={run}>
-              {running ? 'Running…' : ready ? 'Run code' : 'Loading Python…'}
-            </button>
-            <button type="button" disabled={running} onClick={reset}>Reset</button>
-          </div>
-          <div className="lab-console lab-console--scroll">
-            <div className="output-label">Execution console</div>
-            <pre className="output">{output || (ready ? '[Pyodide] Edit code and press Run code.' : '[Pyodide] Loading runtime…')}</pre>
+            <div className="lab-actions lab-actions--pinned">
+              <button type="button" className="primary btn-run-code" disabled={!ready || running} onClick={run}>
+                {running ? 'Running…' : ready ? 'Run code' : 'Loading Python…'}
+              </button>
+              <button type="button" disabled={running} onClick={reset}>Reset</button>
+            </div>
+            <div className="lab-console lab-console--scroll lab-console--grow">
+              <div className="output-label">Execution console</div>
+              <pre className="output">{output || (ready ? '[Pyodide] Edit code and press Run code.' : '[Pyodide] Loading runtime…')}</pre>
+            </div>
           </div>
         </div>
       </section>

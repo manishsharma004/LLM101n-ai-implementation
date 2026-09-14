@@ -430,7 +430,7 @@ a {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(360px, 42%);
   gap: 1rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 .chapter-split-theory {
@@ -440,6 +440,7 @@ a {
 .chapter-split-lab {
   position: sticky;
   top: 5.5rem;
+  height: calc(100vh - 6rem);
   max-height: calc(100vh - 6rem);
   min-width: 0;
 }
@@ -449,6 +450,7 @@ a {
   flex-direction: column;
   overflow: hidden;
   padding: 0.75rem 0.85rem;
+  box-sizing: border-box;
 }
 
 .chapter-split-lab.lab-dock > h2 {
@@ -457,7 +459,16 @@ a {
   flex-shrink: 0;
 }
 
-.chapter-split-lab.lab-dock .py-lab--ide {
+.chapter-split-lab.lab-dock .labs,
+.lab-focus-editor.lab-dock .labs {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.chapter-split-lab.lab-dock .py-lab--ide,
+.lab-focus-editor.lab-dock .py-lab--ide {
   flex: 1;
   min-height: 0;
   display: flex;
@@ -486,15 +497,50 @@ a {
   color: var(--muted);
 }
 
+.lab-ide-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
 .lab-editor-pane {
-  flex: 0 0 auto;
-  min-height: 14rem;
-  max-height: min(22rem, 42vh);
-  height: clamp(14rem, 36vh, 22rem);
+  flex-shrink: 0;
+  min-height: 8.75rem;
   overflow: hidden;
   border-radius: 6px;
   background: #0c1220;
   border: 1px solid var(--border);
+}
+
+.lab-vsplit-handle {
+  flex-shrink: 0;
+  height: 8px;
+  margin: 0.1rem 0;
+  border-radius: 4px;
+  background: var(--border);
+  cursor: row-resize;
+  touch-action: none;
+  position: relative;
+}
+
+.lab-vsplit-handle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 2.5rem;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  opacity: 0.65;
+}
+
+.lab-vsplit-handle:hover,
+.lab-vsplit-handle:active {
+  background: rgba(56, 189, 248, 0.25);
 }
 
 .lab-editor-pane .monaco-editor-host {
@@ -524,17 +570,25 @@ a {
 }
 
 .lab-console--scroll {
-  flex: 1 1 auto;
-  min-height: 4.5rem;
-  max-height: 7.5rem;
-  overflow: auto;
   margin: 0;
   padding: 0.4rem 0.55rem;
   border: 1px solid var(--border);
   border-radius: 6px;
+  background: #0f172a;
 }
 
-.lab-console--scroll .output {
+.lab-console--grow {
+  flex: 1 1 auto;
+  min-height: 5.5rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.lab-console--grow .output {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
   margin: 0;
   font-size: 0.8rem;
   line-height: 1.4;
@@ -627,7 +681,25 @@ a {
   display: grid;
   grid-template-columns: minmax(280px, 1fr) minmax(0, 1.2fr);
   gap: 1rem;
-  min-height: 70vh;
+  min-height: calc(100vh - 9rem);
+  align-items: stretch;
+}
+
+.lab-focus-editor.lab-dock {
+  height: calc(100vh - 9rem);
+  max-height: calc(100vh - 9rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0.75rem 0.85rem;
+  box-sizing: border-box;
+}
+
+.lab-focus-editor.lab-dock .py-lab--ide {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .tensor-placeholder {
