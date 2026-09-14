@@ -2,11 +2,13 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { TopUtilityBar } from '../../components/layout/TopUtilityBar'
 import { graduationQuestions } from '../../content/prerequisites/graduationQuiz'
-import { prereqCompletionCount } from '../../lib/prerequisiteProgress'
+import { allPrereqUnitsComplete, prereqCompletionCount } from '../../lib/prerequisiteProgress'
 import { prerequisiteUnits } from '../../content/prerequisites/units'
 
 export function PrerequisiteGraduationPage() {
-  const { done, total } = prereqCompletionCount(prerequisiteUnits.length)
+  const unitIds = prerequisiteUnits.map((u) => u.id)
+  const { done, total } = prereqCompletionCount(prerequisiteUnits.length, unitIds)
+  const ready = allPrereqUnitsComplete(unitIds)
   const [answers, setAnswers] = useState<Record<string, number>>({})
   const [submitted, setSubmitted] = useState(false)
 
@@ -19,7 +21,6 @@ export function PrerequisiteGraduationPage() {
   }, [answers])
 
   const pct = Math.round((score / graduationQuestions.length) * 100)
-  const ready = done >= total
 
   function pick(qid: string, idx: number) {
     setAnswers((prev) => ({ ...prev, [qid]: idx }))
@@ -45,6 +46,16 @@ export function PrerequisiteGraduationPage() {
         </p>
       </header>
 
+      {!ready ? (
+        <div className="grad-locked panel-surface">
+          <h2>Quiz locked</h2>
+          <p className="muted">
+            Mark all {total} prerequisite units complete on their unit pages before taking the graduation quiz.
+            Progress: <strong>{done}</strong> / {total}.
+          </p>
+          <Link to="/prerequisites" className="primary">Back to prerequisite units</Link>
+        </div>
+      ) : (
       <form
         className="grad-quiz"
         onSubmit={(e) => {
@@ -79,8 +90,9 @@ export function PrerequisiteGraduationPage() {
 
         <button type="submit" className="primary grad-submit">Check answers</button>
       </form>
+      )}
 
-      {submitted ? (
+      {ready && submitted ? (
         <div className="grad-score-card panel-surface">
           <p>
             Score: <strong>{score}</strong> / {graduationQuestions.length} ({pct}%)

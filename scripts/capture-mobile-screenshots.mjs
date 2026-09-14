@@ -37,6 +37,14 @@ for (const vp of viewports) {
     const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height } })
     await page.goto(`${baseUrl}/${hash}`, { waitUntil: 'networkidle', timeout: 90_000 })
     await page.waitForTimeout(1500)
+    if (hash.includes('bigram-language-model')) {
+      await page.locator('.workspace-mobile-tabs button', { hasText: 'Data' }).click().catch(() => {})
+      await page.waitForTimeout(400)
+    }
+    if (hash.includes('multimodal')) {
+      await page.locator('.workspace-mobile-tabs button', { hasText: 'Prompt' }).click().catch(() => {})
+      await page.waitForTimeout(400)
+    }
     const splitCols = await page
       .locator('.chapter-split')
       .first()

@@ -1,3 +1,5 @@
+import { usePinchZoom } from '../../hooks/usePinchZoom'
+
 /** Static micrograd example: a=-4, b=2 → d = a*b + (a+b)² with backward grads from Karpathy demo. */
 
 const NODES = [
@@ -25,14 +27,25 @@ const EDGES = [
 
 export function MicrogradDagMobile() {
   const byId = Object.fromEntries(NODES.map((n) => [n.id, n]))
+  const pinch = usePinchZoom()
 
   return (
     <section className="mobile-rich-panel micrograd-dag" aria-label="Micrograd computation graph">
       <p className="muted micrograd-dag-hint">
-        Expression: <code>d = a * b + (a + b)²</code> — tap nodes show forward <code>.data</code> and backward{' '}
-        <code>.grad</code> after <code>d.backward()</code>.
+        Expression: <code>d = a * b + (a + b)²</code> — pinch to zoom, drag to pan the DAG.
       </p>
-      <div className="micrograd-dag-canvas">
+      <div className="micrograd-dag-toolbar">
+        <button type="button" className="btn-text" onClick={pinch.reset}>Reset view</button>
+      </div>
+      <div
+        ref={pinch.surfaceRef}
+        className="micrograd-dag-canvas pinch-zoom-surface"
+        onPointerDown={pinch.onPointerDown}
+        onPointerMove={pinch.onPointerMove}
+        onPointerUp={pinch.onPointerUp}
+        onPointerCancel={pinch.onPointerUp}
+      >
+        <div className="pinch-zoom-inner" style={{ transform: pinch.transform }}>
         <svg viewBox="0 0 200 100" className="micrograd-dag-svg" aria-hidden>
           {EDGES.map(([from, to]) => {
             const a = byId[from]
@@ -64,6 +77,7 @@ export function MicrogradDagMobile() {
             )}
           </div>
         ))}
+        </div>
       </div>
       <pre className="micrograd-terminal panel-surface">
         [Output] d.data = 24.7 | a.grad = 138.0 | b.grad = 645.0 | Backward pass ~0.4ms
