@@ -14,8 +14,9 @@ export function MermaidBlock({ figure }: { figure: MermaidFigure }) {
         mermaid.initialize({
           startOnLoad: false,
           theme: 'dark',
-          securityLevel: 'strict',
+          securityLevel: 'loose',
           fontFamily: 'ui-sans-serif, system-ui, sans-serif',
+          flowchart: { htmlLabels: true, useMaxWidth: true },
         })
         const { svg: out } = await mermaid.render(`mmd-${id}`, figure.source.trim())
         if (!cancelled) setSvg(out)

@@ -17,7 +17,7 @@ export const partFigures: Record<string, ChapterFigure[]> = {
       type: 'mermaid',
       caption: 'Bigram as a Markov chain (memory = 1 symbol)',
       source: `flowchart LR
-  x0["x_{t-1}"] --> M["P(·|x_{t-1})"]
+  x0["x_prev"] --> M["P next given prev"]
   M --> x1["x_t"]`,
     },
   ],
@@ -70,9 +70,9 @@ export const partFigures: Record<string, ChapterFigure[]> = {
       type: 'mermaid',
       caption: 'Computation graph for y = w·x + b',
       source: `flowchart BT
-  w --> mul["×"]
+  w --> mul["multiply"]
   x --> mul
-  mul --> add["+"]
+  mul --> add["add"]
   b --> add
   add --> y
   y --> L["loss"]`,
@@ -187,11 +187,11 @@ export const partFigures: Record<string, ChapterFigure[]> = {
       source: `flowchart TB
   x --> n1["LayerNorm"]
   n1 --> attn["Masked MHA"]
-  attn --> r1["+"]
+  attn --> r1["residual add"]
   x --> r1
   r1 --> n2["LayerNorm"]
   n2 --> mlp["MLP 4d"]
-  mlp --> r2["+"]
+  mlp --> r2["residual add"]
   r1 --> r2
   r2 --> out["h"]`,
     },
@@ -208,11 +208,11 @@ export const partFigures: Record<string, ChapterFigure[]> = {
       type: 'mermaid',
       caption: 'GPT-2 vs Llama block (conceptual)',
       source: `flowchart LR
-  subgraph GPT2["GPT-2"]
-    A1["Learned pos"] --> A2["LayerNorm + GELU MLP"]
+  subgraph gpt2 [GPT-2 block]
+    A1["Learned pos"] --> A2["LN and GELU MLP"]
   end
-  subgraph Llama["Llama-class"]
-    B1["RoPE"] --> B2["RMSNorm + SwiGLU"]
+  subgraph llama [Llama-class block]
+    B1["RoPE"] --> B2["RMSNorm and SwiGLU"]
   end`,
     },
   ],
@@ -250,7 +250,7 @@ export const partFigures: Record<string, ChapterFigure[]> = {
   start["tokenize to chars/bytes"] --> count["count pairs"]
   count --> pick["argmax pair"]
   pick --> merge["merge globally"]
-  merge --> stop{"K merges?"}
+  merge --> stop{Reached K merges?}
   stop -->|no| count
   stop -->|yes| done["store merge ranks"]`,
     },
@@ -483,8 +483,8 @@ export const partFigures: Record<string, ChapterFigure[]> = {
       caption: 'Frozen base + trainable adapters',
       source: `flowchart LR
   x --> W["W frozen"]
-  x --> BA["B·A trainable"]
-  W --> add["+"]
+  x --> BA["low-rank BA trainable"]
+  W --> add["sum"]
   BA --> add
   add --> y`,
     },
