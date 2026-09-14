@@ -5,7 +5,8 @@ const MIN_EDITOR = 140
 const MIN_CONSOLE = 88
 const HANDLE = 8
 /** Space for run row + handle below editor in lab-ide-body */
-const CHROME_BELOW_EDITOR = 56
+/** Handle + Run row + gaps below the editor pane */
+const CHROME_BELOW_EDITOR = 72
 
 function readStored(): number | null {
   try {
@@ -37,7 +38,7 @@ export function useLabEditorHeight() {
       const h = el!.clientHeight
       if (h < MIN_EDITOR + MIN_CONSOLE + HANDLE + CHROME_BELOW_EDITOR) return
       const stored = readStored()
-      const initial = stored ?? Math.round(h * 0.48)
+      const initial = stored ?? Math.round(h * 0.38)
       setEditorHeight(clampHeight(initial, h))
     }
 
@@ -54,9 +55,8 @@ export function useLabEditorHeight() {
       e.preventDefault()
       const startY = e.clientY
       const startH = heightRef.current
-      const bodyH = el.clientHeight
-
       function onMove(ev: PointerEvent) {
+        const bodyH = el!.clientHeight
         const next = clampHeight(startH + (ev.clientY - startY), bodyH)
         setEditorHeight(next)
       }

@@ -8,11 +8,16 @@ import {
   isPrereqUnitComplete,
   setPrereqUnitComplete,
 } from '../../lib/prerequisiteProgress'
+import { useHorizontalSplit } from '../../hooks/useHorizontalSplit'
 
 export function PrerequisiteUnitPage() {
   const { slug } = useParams()
   const unit = slug ? getPrereqUnitBySlug(slug) : undefined
   const [done, setDone] = useState(() => (unit ? isPrereqUnitComplete(unit.id) : false))
+  const { containerRef, gridTemplateColumns, onPointerDown } = useHorizontalSplit(
+    'llm101n-prereq-split-v1',
+    0.42,
+  )
 
   useEffect(() => {
     if (unit) touchStudyStreak()
@@ -65,8 +70,12 @@ export function PrerequisiteUnitPage() {
         ) : null}
       </header>
 
-      <div className="chapter-split prereq-split">
-        <article className="chapter-split-theory panel-surface">
+      <div
+        ref={containerRef}
+        className="chapter-split prereq-split workspace-hsplit"
+        style={{ gridTemplateColumns }}
+      >
+        <article className="chapter-split-theory panel-surface workspace-hsplit-pane">
           {unit.sections.map((section) => (
             <section key={section.id} className="part">
               <h2>{section.heading}</h2>
@@ -131,10 +140,20 @@ export function PrerequisiteUnitPage() {
         </article>
 
         {unit.labId ? (
-          <aside className="chapter-split-lab lab-dock panel-surface">
+          <>
+            <div
+              className="workspace-hsplit-handle"
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="Resize lesson and lab"
+              title="Drag to resize panels"
+              onPointerDown={onPointerDown}
+            />
+          <aside className="chapter-split-lab lab-dock panel-surface workspace-hsplit-pane">
             <h2>Interactive code</h2>
             <LabPanel labIds={[unit.labId]} variant="ide" />
           </aside>
+          </>
         ) : null}
       </div>
     </div>
