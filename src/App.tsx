@@ -5,6 +5,7 @@ import { HomePage } from './pages/HomePage'
 import { LabFocusPage } from './pages/LabFocusPage'
 import { LearningPlanPage } from './pages/LearningPlanPage'
 import { PrerequisitesHubPage } from './pages/prerequisites/PrerequisitesHubPage'
+import { PrerequisiteGraduationPage } from './pages/prerequisites/PrerequisiteGraduationPage'
 import { PrerequisiteUnitPage } from './pages/prerequisites/PrerequisiteUnitPage'
 import './index.css'
 
@@ -16,6 +17,7 @@ export function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/learning-plan" element={<LearningPlanPage />} />
           <Route path="/prerequisites" element={<PrerequisitesHubPage />} />
+          <Route path="/prerequisites/graduation" element={<PrerequisiteGraduationPage />} />
           <Route path="/prerequisites/:slug" element={<PrerequisiteUnitPage />} />
           <Route path="/chapter/:slug" element={<ChapterPage />} />
           <Route path="/chapter/:slug/focus" element={<LabFocusPage />} />
