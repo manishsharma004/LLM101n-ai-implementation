@@ -31,7 +31,16 @@ export function setPrereqUnitComplete(unitId: string, complete: boolean): void {
   writeIds(ids)
 }
 
-export function prereqCompletionCount(total: number): { done: number; total: number } {
+export function prereqCompletionCount(total: number, unitIds?: string[]): { done: number; total: number } {
   const ids = readIds()
+  if (unitIds?.length) {
+    const done = unitIds.filter((id) => ids.has(id)).length
+    return { done, total }
+  }
   return { done: ids.size, total }
+}
+
+export function allPrereqUnitsComplete(unitIds: string[]): boolean {
+  const ids = readIds()
+  return unitIds.length > 0 && unitIds.every((id) => ids.has(id))
 }

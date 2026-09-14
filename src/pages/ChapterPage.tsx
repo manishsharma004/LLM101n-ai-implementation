@@ -15,7 +15,13 @@ import { useMobileWorkspace } from '../hooks/useMediaQuery'
 import { getBeginnerMode } from '../lib/beginnerMode'
 import { touchStudyStreak } from '../lib/courseStats'
 import { SearchAssistPanel } from '../components/SearchAssistPanel'
+import { BigramLanguageModelMobile } from '../components/mobile/BigramLanguageModelMobile'
 import { MultimodalStoryMobile } from '../components/mobile/MultimodalStoryMobile'
+import {
+  chapterMobileTabs,
+  defaultChapterMobileTab,
+  type ChapterMobileTabId,
+} from '../content/chapterMobileTabs'
 
 export function ChapterPage() {
   const { slug } = useParams()
@@ -24,7 +30,9 @@ export function ChapterPage() {
   const readPct = useChapterReadProgress('.chapter-split-theory', Boolean(chapter))
   const primaryLab = chapter ? getPrimaryLabId(chapter.labIds) : undefined
   const isMobile = useMobileWorkspace()
-  const [mobileTab, setMobileTab] = useState<'theory' | 'lab'>('theory')
+  const [mobileTab, setMobileTab] = useState<ChapterMobileTabId>(() =>
+    chapter ? defaultChapterMobileTab(chapter.slug) : 'theory',
+  )
   const { containerRef, gridTemplateColumns, onPointerDown } = useHorizontalSplit(
     'llm101n-chapter-split-v1',
     0.42,
@@ -33,6 +41,10 @@ export function ChapterPage() {
   useEffect(() => {
     if (chapter) touchStudyStreak()
   }, [chapter?.id])
+
+  useEffect(() => {
+    if (chapter) setMobileTab(defaultChapterMobileTab(chapter.slug))
+  }, [chapter?.slug])
 
   useEffect(() => {
     const onMode = () => setBeginnerMode(getBeginnerMode())
@@ -65,12 +77,9 @@ export function ChapterPage() {
 
       {isMobile ? (
         <MobileWorkspaceTabs
-          tabs={[
-            { id: 'theory', label: 'Theory & Math' },
-            { id: 'lab', label: 'Code Lab' },
-          ]}
+          tabs={chapterMobileTabs(chapter.slug)}
           active={mobileTab}
-          onChange={(id) => setMobileTab(id as 'theory' | 'lab')}
+          onChange={(id) => setMobileTab(id as ChapterMobileTabId)}
           ariaLabel="Chapter workspace"
         />
       ) : null}
@@ -80,12 +89,22 @@ export function ChapterPage() {
         className={`chapter-split workspace-hsplit ${isMobile ? 'workspace-hsplit--stacked' : ''}`}
         style={isMobile ? undefined : { gridTemplateColumns }}
       >
+        {isMobile && mobileTab === 'prompt' && chapter.slug === 'multimodal' ? (
+          <div className="workspace-hsplit-pane mobile-rich-pane">
+            <MultimodalStoryMobile />
+          </div>
+        ) : null}
+
+        {isMobile && mobileTab === 'metrics' && chapter.slug === 'bigram-language-model' ? (
+          <div className="workspace-hsplit-pane mobile-rich-pane">
+            <BigramLanguageModelMobile />
+          </div>
+        ) : null}
+
         <article
           className="chapter-split-theory panel-surface workspace-hsplit-pane"
           hidden={isMobile && mobileTab !== 'theory'}
         >
-          {isMobile && chapter.slug === 'multimodal' ? <MultimodalStoryMobile /> : null}
-
           <header className="theory-header">
             <p className="eyebrow">
               Phase {phase?.number ?? '—'} · {chapter.syllabusTopic}

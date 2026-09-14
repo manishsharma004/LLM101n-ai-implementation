@@ -9,7 +9,8 @@ import {
 
 export function PrerequisitesHubPage() {
   const [, tick] = useState(0)
-  const { done, total } = prereqCompletionCount(prerequisiteUnits.length)
+  const unitIds = prerequisiteUnits.map((u) => u.id)
+  const { done, total } = prereqCompletionCount(prerequisiteUnits.length, unitIds)
 
   useEffect(() => {
     const refresh = () => tick((n) => n + 1)
