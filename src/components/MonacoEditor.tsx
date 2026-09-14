@@ -8,6 +8,8 @@ export type MonacoEditorProps = {
   language?: string
   minLines?: number
   ariaLabel?: string
+  /** Fixed-height pane; Monaco scrolls inside (IDE labs). */
+  constrained?: boolean
 }
 
 export function MonacoEditor({
@@ -16,6 +18,7 @@ export function MonacoEditor({
   language = 'python',
   minLines = 8,
   ariaLabel = 'Python code editor',
+  constrained = false,
 }: MonacoEditorProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null)
@@ -24,7 +27,9 @@ export function MonacoEditor({
   const [ready, setReady] = useState(false)
 
   onChangeRef.current = onChange
-  const minHeight = `${Math.max(minLines, value.split('\n').length + 1) * 1.45 + 1}rem`
+  const minHeight = constrained
+    ? undefined
+    : `${Math.max(minLines, value.split('\n').length + 1) * 1.45 + 1}rem`
 
   useEffect(() => {
     let disposed = false
@@ -69,8 +74,8 @@ export function MonacoEditor({
 
   return (
     <div
-      className={`monaco-editor-host${ready ? ' monaco-editor-host--ready' : ''}`}
-      style={{ minHeight }}
+      className={`monaco-editor-host${ready ? ' monaco-editor-host--ready' : ''}${constrained ? ' monaco-editor-host--constrained' : ''}`}
+      style={minHeight ? { minHeight } : undefined}
       ref={hostRef}
     />
   )

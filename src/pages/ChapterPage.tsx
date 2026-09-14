@@ -131,7 +131,7 @@ export function ChapterPage() {
           </nav>
         </article>
 
-        <aside className="chapter-split-lab panel-surface" aria-label="Interactive labs">
+        <aside className="chapter-split-lab lab-dock panel-surface" aria-label="Interactive labs">
           <div className="lab-column-head">
             <h2>Interactive code</h2>
             {primaryLab ? (

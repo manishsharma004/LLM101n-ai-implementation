@@ -441,7 +441,109 @@ a {
   position: sticky;
   top: 5.5rem;
   max-height: calc(100vh - 6rem);
-  overflow-y: auto;
+  min-width: 0;
+}
+
+.chapter-split-lab.lab-dock {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0.75rem 0.85rem;
+}
+
+.chapter-split-lab.lab-dock > h2 {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.chapter-split-lab.lab-dock .py-lab--ide {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.lab-ide-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 0;
+  flex: 1;
+}
+
+.lab-ide-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.lab-ide-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.lab-editor-pane {
+  flex: 0 0 auto;
+  min-height: 14rem;
+  max-height: min(22rem, 42vh);
+  height: clamp(14rem, 36vh, 22rem);
+  overflow: hidden;
+  border-radius: 6px;
+  background: #0c1220;
+  border: 1px solid var(--border);
+}
+
+.lab-editor-pane .monaco-editor-host {
+  height: 100%;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+  opacity: 1;
+}
+
+.monaco-editor-host--constrained {
+  height: 100%;
+}
+
+.lab-actions--pinned {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0.35rem 0 0;
+  position: sticky;
+  bottom: 0;
+  background: var(--panel);
+  z-index: 2;
+}
+
+.chapter-split-lab.lab-dock .lab-actions--pinned {
+  background: var(--panel);
+}
+
+.lab-console--scroll {
+  flex: 1 1 auto;
+  min-height: 4.5rem;
+  max-height: 7.5rem;
+  overflow: auto;
+  margin: 0;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.lab-console--scroll .output {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.runtime-banner--compact {
+  margin: 0;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.78rem;
 }
 
 .lab-column-head {
@@ -461,10 +563,7 @@ a {
   border: none;
   padding: 0;
   margin: 0;
-}
-
-.py-lab--ide .panel {
-  border: none;
+  box-shadow: none;
 }
 
 .btn-run-code {
@@ -479,6 +578,12 @@ a {
   border-radius: 8px;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
+}
+
+.lab-footnote {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  margin: 0.35rem 0 0;
 }
 
 .lab-header-row {
@@ -1366,6 +1471,14 @@ button.primary {
   .chapter-split-lab {
     position: static;
     max-height: none;
+  }
+
+  .chapter-split-lab.lab-dock {
+    overflow: visible;
+  }
+
+  .lab-editor-pane {
+    max-height: 20rem;
   }
 }
 

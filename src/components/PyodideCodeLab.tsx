@@ -72,31 +72,68 @@ export function PyodideCodeLab({
 
   const ide = variant === 'ide'
 
+  if (ide) {
+    return (
+      <section className="lab py-lab py-lab--ide" aria-label="Python lab">
+        <div className="lab-ide-shell">
+          <div className="lab-ide-meta">
+            <span className="lab-ide-title">Pyodide editor</span>
+            {running ? (
+              <span className="lab-status running">Running…</span>
+            ) : ready ? (
+              <span className="lab-status ready">Ready</span>
+            ) : (
+              <span className="lab-status">Loading…</span>
+            )}
+          </div>
+          <RuntimeBanner
+            phase={phase}
+            message={message}
+            error={error}
+            onRetry={retry}
+            compact
+          />
+          <div className="lab-editor-pane">
+            <MonacoEditor
+              value={code}
+              onChange={setCode}
+              language="python"
+              minLines={editorMinLines}
+              ariaLabel="Python lab code"
+              constrained
+            />
+          </div>
+          <div className="lab-actions lab-actions--pinned">
+            <button type="button" className="primary btn-run-code" disabled={!ready || running} onClick={run}>
+              {running ? 'Running…' : ready ? 'Run code' : 'Loading Python…'}
+            </button>
+            <button type="button" disabled={running} onClick={reset}>Reset</button>
+          </div>
+          <div className="lab-console lab-console--scroll">
+            <div className="output-label">Execution console</div>
+            <pre className="output">{output || (ready ? '[Pyodide] Edit code and press Run code.' : '[Pyodide] Loading runtime…')}</pre>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   return (
-    <section className={`panel lab py-lab ${ide ? 'py-lab--ide' : ''}`}>
-      <div className="lab-header-row">
-        <h3>{ide ? 'Pyodide editor' : title}</h3>
-        {running ? <span className="lab-status running">Running…</span> : ready ? <span className="lab-status ready">Ready</span> : null}
-      </div>
-      {!ide && description ? <p className="muted">{description}</p> : null}
+    <section className="panel lab py-lab">
+      <h3>{title}</h3>
+      {description ? <p className="muted">{description}</p> : null}
       <RuntimeBanner phase={phase} message={message} error={error} onRetry={retry} />
-      {!ide ? <p className="lab-hint">{hint}</p> : null}
-      <MonacoEditor
-        value={code}
-        onChange={setCode}
-        language="python"
-        minLines={ide ? Math.max(editorMinLines, 18) : editorMinLines}
-        ariaLabel="Python lab code"
-      />
+      <p className="lab-hint">{hint}</p>
+      <MonacoEditor value={code} onChange={setCode} language="python" minLines={editorMinLines} ariaLabel="Python lab code" />
       <div className="lab-actions">
-        <button type="button" className="primary btn-run-code" disabled={!ready || running} onClick={run}>
-          {running ? 'Running…' : ready ? (ide ? 'Run code' : runLabel) : 'Loading Python…'}
+        <button type="button" className="primary" disabled={!ready || running} onClick={run}>
+          {running ? 'Running…' : ready ? runLabel : 'Loading Python…'}
         </button>
-        <button type="button" disabled={running} onClick={reset}>Reset</button>
+        <button type="button" disabled={running} onClick={reset}>Reset starter code</button>
       </div>
-      <div className="output-block lab-console">
-        <div className="output-label">Execution console</div>
-        <pre className="output">{output || (ready ? '[Pyodide] Edit code and press Run code.' : '[Pyodide] Loading runtime…')}</pre>
+      <div className="output-block">
+        <div className="output-label">Output</div>
+        <pre className="output">{output || '(no output)'}</pre>
       </div>
     </section>
   )
