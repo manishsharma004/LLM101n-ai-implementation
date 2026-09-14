@@ -1011,6 +1011,104 @@ button.primary {
   color: #f87171;
 }
 
+/* Chapter interactives (theory panel + legacy rail) */
+.rail-interactive,
+.rail-block {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  background: var(--panel-deep);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.rail-subtitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  background: #0f172a;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 0.4rem 0.55rem;
+  font-size: 0.78rem;
+}
+
+.chip.active {
+  border-color: var(--accent);
+}
+
+.rail-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.rail-slider input[type='range'] {
+  width: 100%;
+}
+
+.mini-bars {
+  margin-top: 0.5rem;
+}
+
+.mini-bar-row {
+  display: grid;
+  grid-template-columns: 1.25rem 1fr 2.5rem;
+  gap: 0.35rem;
+  align-items: center;
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.mini-bar-track {
+  height: 6px;
+  background: #0f172a;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.mini-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+}
+
+.rail-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.mask-grid {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  max-width: 140px;
+}
+
+.mask-on {
+  aspect-ratio: 1;
+  background: rgba(56, 189, 248, 0.75);
+  border-radius: 2px;
+}
+
+.mask-off {
+  aspect-ratio: 1;
+  background: #1e293b;
+  border-radius: 2px;
+}
+
 .chapter-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
