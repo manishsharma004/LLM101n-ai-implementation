@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { prerequisiteUnits } from '../../content/prerequisites/units'
 import { TopUtilityBar } from '../../components/layout/TopUtilityBar'
 import {
+  allPrereqUnitsComplete,
   isPrereqUnitComplete,
   prereqCompletionCount,
 } from '../../lib/prerequisiteProgress'
@@ -11,6 +12,7 @@ export function PrerequisitesHubPage() {
   const [, tick] = useState(0)
   const unitIds = prerequisiteUnits.map((u) => u.id)
   const { done, total } = prereqCompletionCount(prerequisiteUnits.length, unitIds)
+  const gradUnlocked = allPrereqUnitsComplete(unitIds)
 
   useEffect(() => {
     const refresh = () => tick((n) => n + 1)
@@ -75,7 +77,7 @@ export function PrerequisitesHubPage() {
 
       <div className="prereq-hub-footer-cta">
         <Link to="/prerequisites/graduation" className="primary prereq-graduate-btn">
-          {done >= total ? 'Graduation quiz' : 'Graduation quiz (complete units)'}
+          {gradUnlocked ? 'Graduation quiz' : `Graduation quiz (${done}/${total} units)`}
         </Link>
         <Link to="/chapter/bigram-language-model" className="btn-text prereq-chapter-one-link">
           Start Chapter 1 →
