@@ -4,6 +4,7 @@ export type LabId =
   | 'micrograd'
   | 'mlp'
   | 'attention'
+  | 'transformer-block'
   | 'bpe'
   | 'optimizer'
   | 'device'

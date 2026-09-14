@@ -23,7 +23,7 @@ After merge to `master`, GitHub Actions (`.github/workflows/deploy.yml`) publish
 
 >  What I cannot create, I do not understand. -Richard Feynman
 
-In this course we will build a Storyteller AI Large Language Model (LLM). Hand in hand, you'll be able to create, refine and illustrate little [stories](https://huggingface.co/datasets/roneneldan/TinyStories) with the AI. We are going to build everything end-to-end from basics to a functioning web app similar to ChatGPT, from scratch in Python, C and CUDA, and with minimal computer science prerequisites. By the end you should have a relatively deep understanding of AI, LLMs, and deep learning more generally.
+This **browser course** walks the archived [karpathy/LLM101n](https://github.com/karpathy/LLM101n) syllabus: theory, diagrams, and **Pyodide labs** (Python in-tab — no install). You train toy models on a bundled [TinyStories](https://huggingface.co/datasets/roneneldan/TinyStories) shard, use the Storyteller UI, and get AI help via search-engine redirects (no backend API keys). Production-scale training in C/CUDA is out of scope here; the goal is deep intuition for transformers, tokenization, optimization, and deployment concepts before you move to a GPU stack.
 
 **Syllabus**
 

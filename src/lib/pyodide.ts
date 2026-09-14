@@ -1,4 +1,5 @@
 import { loadPyodide, version as pyodideVersion, type PyodideInterface } from 'pyodide'
+import { mountCorpusOnPyodide } from './tinystoriesCorpus'
 
 let pyodidePromise: Promise<PyodideInterface> | null = null
 
@@ -27,7 +28,9 @@ export function getPyodide(): Promise<PyodideInterface> {
     pyodidePromise = loadPyodide({
       indexURL: `https://cdn.jsdelivr.net/pyodide/v${pyodideVersion}/full/`,
     })
-      .then((py) => {
+      .then(async (py) => {
+        emit('Mounting TinyStories sample for labs…')
+        await mountCorpusOnPyodide(py)
         emit('Python ready.')
         return py
       })

@@ -2,13 +2,17 @@
 
 export const CORPUS_FETCH_HELPER = String.raw`
 def load_corpus():
-    import urllib.request
+    """Reads /tinystories-sample.txt mounted by the host app before Run."""
     try:
-        with urllib.request.urlopen("./data/tinystories-sample.txt") as f:
-            return f.read().decode("utf-8")
-    except Exception as e:
-        print("Using fallback corpus:", e)
-        return "Once upon a time, there was a little girl named Lily. She loved the forest."
+        with open("/tinystories-sample.txt", "r", encoding="utf-8") as f:
+            text = f.read()
+    except OSError as e:
+        raise RuntimeError(
+            "TinyStories shard not mounted — wait for Pyodide ready or refresh the page"
+        ) from e
+    if len(text) < 500:
+        raise RuntimeError(f"Corpus too small ({len(text)} chars) — lab cannot train on this shard")
+    return text
 `
 
 export const BIGRAM_STARTER_PYTHON = String.raw`${CORPUS_FETCH_HELPER}
@@ -230,18 +234,137 @@ print("first line:", lines[0][:80] if lines else "(empty)")
 `
 
 export const OPTIMIZER_STARTER_PYTHON = String.raw`
-# Gradient descent on a stiff quadratic (optimizer intuition)
-x, y = 4.0, 2.0
-lr = 0.08
-path = []
-for step in range(25):
-    gx, gy = 2 * x, 20 * y
-    x -= lr * gx
-    y -= lr * gy
-    if step % 5 == 0:
-        loss = x * x + 10 * y * y
-        path.append(f"step {step:2d} loss={loss:.4f} x={x:.3f} y={y:.3f}")
-print("\\n".join(path))
+# SGD vs Adam vs AdamW on f(x,y) = x^2 + 10 y^2 (stiff axes)
+import math
+
+def loss(x, y):
+    return x * x + 10 * y * y
+
+
+def grad(x, y):
+    return 2 * x, 20 * y
+
+
+def run_sgd(steps=30, lr=0.08):
+    x, y = 4.0, 2.0
+    for _ in range(steps):
+        gx, gy = grad(x, y)
+        x -= lr * gx
+        y -= lr * gy
+    return loss(x, y)
+
+
+def run_adam(steps=30, lr=0.15, beta1=0.9, beta2=0.999, eps=1e-8):
+    x, y = 4.0, 2.0
+    mx, my, vx, vy = 0.0, 0.0, 0.0, 0.0
+    for t in range(1, steps + 1):
+        gx, gy = grad(x, y)
+        mx = beta1 * mx + (1 - beta1) * gx
+        my = beta1 * my + (1 - beta1) * gy
+        vx = beta2 * vx + (1 - beta2) * gx * gx
+        vy = beta2 * vy + (1 - beta2) * gy * gy
+        mx_hat = mx / (1 - beta1 ** t)
+        my_hat = my / (1 - beta1 ** t)
+        vx_hat = vx / (1 - beta2 ** t)
+        vy_hat = vy / (1 - beta2 ** t)
+        x -= lr * mx_hat / (math.sqrt(vx_hat) + eps)
+        y -= lr * my_hat / (math.sqrt(vy_hat) + eps)
+    return loss(x, y)
+
+
+def run_adamw(steps=30, lr=0.15, wd=0.01, beta1=0.9, beta2=0.999, eps=1e-8):
+    x, y = 4.0, 2.0
+    mx, my, vx, vy = 0.0, 0.0, 0.0, 0.0
+    for t in range(1, steps + 1):
+        gx, gy = grad(x, y)
+        mx = beta1 * mx + (1 - beta1) * gx
+        my = beta1 * my + (1 - beta1) * gy
+        vx = beta2 * vx + (1 - beta2) * gx * gx
+        vy = beta2 * vy + (1 - beta2) * gy * gy
+        mx_hat = mx / (1 - beta1 ** t)
+        my_hat = my / (1 - beta1 ** t)
+        vx_hat = vx / (1 - beta2 ** t)
+        vy_hat = vy / (1 - beta2 ** t)
+        x -= lr * (mx_hat / (math.sqrt(vx_hat) + eps) + wd * x)
+        y -= lr * (my_hat / (math.sqrt(vy_hat) + eps) + wd * y)
+    return loss(x, y)
+
+
+print("final loss (lower is better):")
+print(f"  SGD:   {run_sgd():.6f}")
+print(f"  Adam:  {run_adam():.6f}")
+print(f"  AdamW: {run_adamw():.6f}")
+print("AdamW decouples weight decay from the adaptive step — default in modern LM trainers.")
+`
+
+export const TRANSFORMER_BLOCK_STARTER_PYTHON = String.raw`
+import math
+import random
+
+random.seed(0)
+
+
+def softmax(xs):
+    m = max(xs)
+    ex = [math.exp(x - m) for x in xs]
+    s = sum(ex)
+    return [e / s for e in ex]
+
+
+def layer_norm(x, eps=1e-5):
+    mu = sum(x) / len(x)
+    var = sum((v - mu) ** 2 for v in x) / len(x)
+    inv = 1.0 / math.sqrt(var + eps)
+    return [(v - mu) * inv for v in x]
+
+
+def dot(a, b):
+    return sum(ai * bi for ai, bi in zip(a, b))
+
+
+def matvec(rows, v):
+    return [dot(r, v) for r in rows]
+
+
+def causal_attention(x_tokens, d):
+    T = len(x_tokens)
+    scale = 1.0 / math.sqrt(d)
+    out = []
+    for i in range(T):
+        scores = []
+        for j in range(T):
+            s = dot(x_tokens[i], x_tokens[j]) * scale
+            scores.append(-1e9 if j > i else s)
+        w = softmax(scores)
+        mixed = [0.0] * d
+        for j in range(T):
+            for k in range(d):
+                mixed[k] += w[j] * x_tokens[j][k]
+        out.append(mixed)
+    return out
+
+
+def mlp_token(x, hidden):
+    h = [max(0.0, v) for v in matvec(hidden, x)]  # ReLU toy FFN
+    w2 = [[random.uniform(-0.1, 0.1) for _ in range(len(hidden))] for _ in range(len(x))]
+    return matvec(w2, h)
+
+
+def transformer_block(x_tokens):
+    d = len(x_tokens[0])
+    hidden = [[random.uniform(-0.1, 0.1) for _ in range(d)] for _ in range(2 * d)]
+    attn_out = causal_attention(x_tokens, d)
+    x1 = [layer_norm([a + b for a, b in zip(xi, ai)]) for xi, ai in zip(x_tokens, attn_out)]
+    mlp_out = [mlp_token(xi, hidden) for xi in x1]
+    return [layer_norm([a + b for a, b in zip(xi, mi)]) for xi, mi in zip(x1, mlp_out)]
+
+
+T, d = 4, 6
+x0 = [[random.uniform(-0.2, 0.2) for _ in range(d)] for _ in range(T)]
+x1 = transformer_block(x0)
+print(f"block in/out shapes: {len(x0)}x{d} -> {len(x1)}x{len(x1[0])}")
+print("token 0 L2 norm before/after:", round(math.sqrt(sum(v * v for v in x0[0])), 4), "->", round(math.sqrt(sum(v * v for v in x1[0])), 4))
+print("One decoder block: causal attn + residual + norm + MLP + residual + norm.")
 `
 
 export const QUANT_STARTER_PYTHON = String.raw`

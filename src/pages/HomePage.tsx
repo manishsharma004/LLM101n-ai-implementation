@@ -9,6 +9,7 @@ import { ProgressPanel } from '../components/ProgressPanel'
 import { StorytellerPanel } from '../components/StorytellerPanel'
 import { TopUtilityBar } from '../components/layout/TopUtilityBar'
 import { isChapterComplete } from '../lib/progress'
+import { recommendedNextStep } from '../lib/guidedPath'
 
 function moduleStatus(chapterId: string): 'done' | 'progress' | 'todo' {
   if (isChapterComplete(chapterId)) return 'done'
@@ -23,6 +24,8 @@ export function HomePage() {
     return () => window.removeEventListener('llm101n-progress', onUpdate)
   }, [])
 
+  const guided = recommendedNextStep()
+
   return (
     <div className="workspace-page dashboard-page">
       <TopUtilityBar crumbs={[{ label: 'Home', to: '/' }, { label: 'Course modules' }]} />
@@ -31,9 +34,17 @@ export function HomePage() {
         <p className="subtitle">
           Track progress across 17 chapters in four phases. Each module includes theory, diagrams, and Pyodide labs.
         </p>
+        <section className="guided-next-step" aria-label="Recommended next step">
+          <h2 className="guided-next-title">{guided.title}</h2>
+          <p className="muted guided-next-blurb">{guided.description}</p>
+          <Link to={guided.to} className="primary guided-next-cta">
+            {guided.cta}
+          </Link>
+        </section>
         <p className="prereq-cta">
-          New to Python or PyTorch? Start the{' '}
-          <Link to="/prerequisites">prerequisites subpath</Link> (Units 0.0–0.5) before Phase 1.
+          Optional ramp:{' '}
+          <Link to="/prerequisites">prerequisites Units 0.0–0.5</Link> (Python + makemore) before Chapter 1 if you are
+          new to the stack.
         </p>
       </header>
 
