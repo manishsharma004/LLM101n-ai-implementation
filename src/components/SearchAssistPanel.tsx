@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   buildTutorPrompt,
   getPreferredSearchEngine,
@@ -17,6 +17,10 @@ type Props = {
 export function SearchAssistPanel({ chapterTitle, defaultQuestion = '', label = 'Ask with search AI' }: Props) {
   const [engine, setEngine] = useState<SearchEngineId>(() => getPreferredSearchEngine())
   const [question, setQuestion] = useState(defaultQuestion)
+
+  useEffect(() => {
+    setQuestion(defaultQuestion)
+  }, [defaultQuestion])
 
   function onAsk() {
     const prompt = buildTutorPrompt(question, { chapterTitle, moduleTitle: 'LLM101n Storyteller' })
