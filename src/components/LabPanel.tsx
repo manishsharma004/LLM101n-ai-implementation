@@ -12,6 +12,7 @@ import {
   MLP_STARTER_PYTHON,
   MULTIMODAL_STARTER_PYTHON,
   OPTIMIZER_STARTER_PYTHON,
+  TRANSFORMER_BLOCK_STARTER_PYTHON,
   PRECISION_STARTER_PYTHON,
   QUANT_STARTER_PYTHON,
   SFT_STARTER_PYTHON,
@@ -59,6 +60,13 @@ const PY_LAB: Partial<
     code: ATTENTION_STARTER_PYTHON,
     minLines: 12,
   },
+  'transformer-block': {
+    title: 'Lab: One GPT-style decoder block (Python)',
+    description: 'Causal self-attention + residual + LayerNorm + toy MLP — shapes for T tokens.',
+    code: TRANSFORMER_BLOCK_STARTER_PYTHON,
+    runLabel: 'Run block forward',
+    minLines: 14,
+  },
   dataset: {
     title: 'Lab: TinyStories sample loader (Python)',
     code: DATASET_STARTER_PYTHON,
@@ -87,9 +95,10 @@ const PY_LAB: Partial<
     minLines: 10,
   },
   optimizer: {
-    title: 'Lab: Gradient descent (Python)',
+    title: 'Lab: SGD vs Adam vs AdamW (Python)',
+    description: 'Same stiff quadratic; compare final loss — AdamW decouples weight decay.',
     code: OPTIMIZER_STARTER_PYTHON,
-    minLines: 10,
+    minLines: 12,
   },
   precision: {
     title: 'Lab: fp32 drift (Python)',

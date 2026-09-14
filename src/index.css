@@ -618,7 +618,7 @@ a {
   position: sticky;
   bottom: 0;
   background: var(--panel);
-  z-index: 2;
+  z-index: 12;
 }
 
 .chapter-split-lab.lab-dock .lab-actions--pinned {
@@ -799,8 +799,18 @@ a {
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
-  z-index: 100;
+  z-index: 8;
   padding: 0.65rem 0.75rem 0.85rem;
+}
+
+.floating-tutor--lab {
+  max-height: min(42vh, 320px);
+  overflow: auto;
+}
+
+.floating-tutor--lab:not(.minimized) {
+  bottom: auto;
+  top: max(4.5rem, env(safe-area-inset-top, 0px));
 }
 
 .floating-tutor.minimized {
@@ -832,7 +842,7 @@ a {
   position: fixed;
   right: 1rem;
   bottom: 1rem;
-  z-index: 100;
+  z-index: 8;
   background: linear-gradient(135deg, var(--accent), var(--accent-purple));
   color: #0f172a;
   font-weight: 700;
@@ -1806,6 +1816,12 @@ button.primary {
     max-width: calc(100vw - 1rem);
   }
 
+  .tutor-fab--lab {
+    left: 0.5rem;
+    right: auto;
+    bottom: 0.65rem;
+  }
+
   .prereq-unit-grid,
   .prereq-unit-list {
     list-style: none;
@@ -1895,6 +1911,30 @@ button.primary {
     border-radius: 12px;
     font-weight: 700;
   }
+}
+
+.guided-next-step {
+  margin: 1.25rem 0 0;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--panel));
+  max-width: 42rem;
+}
+
+.guided-next-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+.guided-next-blurb {
+  margin: 0 0 0.75rem;
+  font-size: 0.92rem;
+}
+
+.guided-next-cta {
+  display: inline-block;
+  text-decoration: none;
 }
 
 /* Prerequisites subpath */

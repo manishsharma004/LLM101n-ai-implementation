@@ -265,7 +265,7 @@ loss = -math.log(probs[target] + 1e-9)`,
     syllabusTopic: 'transformer, residual, layernorm, GPT-2',
     readingTime: '75–90 min',
     premise: 'Stack blocks: attention → residual → LayerNorm → MLP → residual → LayerNorm. This is the GPT decoder stack—here you connect the pieces you have already coded (attention + MLP) to the full block diagram and modern variants.',
-    labIds: ['attention', 'mlp'],
+    labIds: ['transformer-block', 'attention', 'mlp'],
     tutorSeeds: ['Pre-norm vs post-norm?', 'Why residuals help optimization?'],
     parts: [
       {
